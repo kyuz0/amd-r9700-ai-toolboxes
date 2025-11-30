@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-MODEL_DIR="$(realpath models)"
+MODEL_DIR="$(realpath ~/models)"
 RESULTDIR="results"
 mkdir -p "$RESULTDIR"
 
@@ -96,7 +96,7 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
           EXTRA_ARGS=( -fa 1 )
         fi
 
-        for CTX in default longctx32768; do
+        for CTX in default; do
           CTX_SUFFIX=""
           CTX_ARGS=()
           if [[ "$CTX" == longctx32768 ]]; then
@@ -120,7 +120,7 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
             continue
           fi
 
-          FULL_CMD=( $CMD_EFFECTIVE -ngl 99 -mmp 0 -m "$MODEL_PATH" "${EXTRA_ARGS[@]}" "${CTX_ARGS[@]}" -r "$CTX_REPS" )
+          FULL_CMD=( $CMD_EFFECTIVE -ngl 99 -m "$MODEL_PATH" "${EXTRA_ARGS[@]}" "${CTX_ARGS[@]}" -r "$CTX_REPS" )
 
           printf "\n▶ [%s] %s%s%s\n" "$ENV" "$MODEL_NAME" "${SUFFIX:+ $SUFFIX}" "${CTX_SUFFIX:+ $CTX_SUFFIX}"
           printf "  → log: %s\n" "$OUT"
