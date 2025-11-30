@@ -57,9 +57,9 @@ function cacheUI() {
         hipblasModalOpen: document.getElementById("hipblas-modal-open"),
         hipblasModal: document.getElementById("hipblas-modal"),
         hipblasModalClose: document.getElementById("hipblas-modal-close"),
-        rpcModalOpen: document.getElementById("rpc-modal-open"),
-        rpcModal: document.getElementById("rpc-modal"),
-        rpcModalClose: document.getElementById("rpc-modal-close"),
+        dualModalOpen: document.getElementById("dual-modal-open"),
+        dualModal: document.getElementById("dual-modal"),
+        dualModalClose: document.getElementById("dual-modal-close"),
         rocwmmaModalOpen: document.getElementById("rocwmma-modal-open"),
         rocwmmaModal: document.getElementById("rocwmma-modal"),
         rocwmmaModalClose: document.getElementById("rocwmma-modal-close"),
@@ -77,9 +77,9 @@ function setupModals() {
             close: state.ui.hipblasModalClose,
         },
         {
-            open: state.ui.rpcModalOpen,
-            modal: state.ui.rpcModal,
-            close: state.ui.rpcModalClose,
+            open: state.ui.dualModalOpen,
+            modal: state.ui.dualModal,
+            close: state.ui.dualModalClose,
         },
         {
             open: state.ui.rocwmmaModalOpen,
@@ -186,7 +186,7 @@ function ensureModel(testEntry, modelName, run) {
             quant: (run.quant || "Unknown").toUpperCase(),
             sizeB: run.name_params_b ?? run.params_b ?? null,
             backends: {},
-            isRpc: Boolean(run.rpc),
+            isDual: run.gpu_config === "dual",
             search_blob: [modelName, run.quant, run.env, run.test]
                 .filter(Boolean)
                 .map((s) => s.toString().toLowerCase())
@@ -202,10 +202,10 @@ function ensureModel(testEntry, modelName, run) {
         state.sizeStats.min = Math.min(state.sizeStats.min, row.sizeB);
         state.sizeStats.max = Math.max(state.sizeStats.max, row.sizeB);
     }
-    if (run.rpc) {
-        row.isRpc = true;
-        if (!row.search_blob.includes("rpc")) {
-            row.search_blob = `${row.search_blob} rpc`;
+    if (run.gpu_config === "dual") {
+        row.isDual = true;
+        if (!row.search_blob.includes("dual")) {
+            row.search_blob = `${row.search_blob} dual`;
         }
     }
     return row;
@@ -462,11 +462,11 @@ function buildSingleTable(models, backendList) {
         nameSpan.className = "model-name";
         nameSpan.textContent = model.model;
         head.appendChild(nameSpan);
-        if (model.isRpc) {
+        if (model.isDual) {
             const pill = document.createElement("span");
-            pill.className = "model-pill model-pill-rpc";
-            pill.title = "Run executed via llama.cpp RPC across two servers";
-            pill.textContent = "RPC · dual server";
+            pill.className = "model-pill model-pill-dual";
+            pill.title = "Run executed on Dual GPU (2x R9700)";
+            pill.textContent = "Dual GPU";
             head.appendChild(pill);
         }
         tdModel.appendChild(head);

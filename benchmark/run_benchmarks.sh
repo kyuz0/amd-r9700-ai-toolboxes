@@ -30,11 +30,10 @@ declare -A CMDS=(
   [rocm6_4_4-rocwmma]="toolbox run -c llama-rocm-6.4.4-rocwmma -- /usr/local/bin/llama-bench"
   [rocm7.1]="toolbox run -c llama-rocm-7.1 -- /usr/local/bin/llama-bench"
   [rocm7.1-rocwmma]="toolbox run -c llama-rocm-7.1-rocwmma -- /usr/local/bin/llama-bench"
-  [rocm-7alpha-rocwmma-improved]="toolbox run -c llama-rocm-7alpha-rocwmma-improved -- /usr/local/bin/llama-bench"
-  [rocm-7alpha]="toolbox run -c llama-rocm-7alpha -- /usr/local/bin/llama-bench"
-  [rocm-7alpha-rocwmma]="toolbox run -c llama-rocm-7alpha-rocwmma -- /usr/local/bin/llama-bench"  
-  [rocm7_rc]="toolbox run -c llama-rocm-7rc -- /usr/local/bin/llama-bench"
-  [rocm7_rc-rocwmma]="toolbox run -c llama-rocm-7rc-rocwmma -- /usr/local/bin/llama-bench"
+  [rocm-7-nightly]="toolbox run -c llama-rocm-7-nightly -- /usr/local/bin/llama-bench"
+  [rocm-7-nightly-rocwmma]="toolbox run -c llama-rocm-7-nightly-rocwmma -- /usr/local/bin/llama-bench"
+  [rocm-7.9]="toolbox run -c llama-rocm-7.9 -- /usr/local/bin/llama-bench"
+  [rocm-7.9-rocwmma]="toolbox run -c llama-rocm-7.9-rocwmma -- /usr/local/bin/llama-bench"
   [vulkan_amdvlk]="toolbox run -c llama-vulkan-amdvlk -- /usr/sbin/llama-bench"
   [vulkan_radv]="toolbox run -c llama-vulkan-radv -- /usr/sbin/llama-bench"
 )
@@ -50,6 +49,15 @@ get_hblt_modes() {
 
 for MODEL_PATH in "${MODEL_PATHS[@]}"; do
   MODEL_NAME="$(basename "$MODEL_PATH" .gguf)"
+  MODEL_SIZE=$(stat -c%s "$MODEL_PATH")
+  # Threshold: 30 GiB = 32212254720 bytes. Using 32000000000 as a safe cutoff.
+  if (( MODEL_SIZE > 32000000000 )); then
+    GPU_DEVICES="0,1"
+    GPU_SUFFIX="__dual"
+  else
+    GPU_DEVICES="0"
+    GPU_SUFFIX="__single"
+  fi
 
   for ENV in "${!CMDS[@]}"; do
     CMD="${CMDS[$ENV]}"
@@ -62,9 +70,9 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
       if [[ "$ENV" == rocm* ]]; then
         if [[ "$MODE" == off ]]; then
           BASE_SUFFIX="__hblt0"
-          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env ROCBLAS_USE_HIPBLASLT=0 }"
+          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env HIP_VISIBLE_DEVICES=$GPU_DEVICES env ROCBLAS_USE_HIPBLASLT=0 }"
         else
-          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env ROCBLAS_USE_HIPBLASLT=1 }"
+          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env HIP_VISIBLE_DEVICES=$GPU_DEVICES env ROCBLAS_USE_HIPBLASLT=1 }"
         fi
       fi
 
@@ -90,7 +98,7 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
             fi
           fi
 
-          OUT="$RESULTDIR/${MODEL_NAME}__${ENV}${SUFFIX}${CTX_SUFFIX}.log"
+          OUT="$RESULTDIR/${MODEL_NAME}__${ENV}${SUFFIX}${CTX_SUFFIX}${GPU_SUFFIX}.log"
           CTX_REPS=3
           if [[ "$CTX" == longctx32768 ]]; then
             CTX_REPS=1

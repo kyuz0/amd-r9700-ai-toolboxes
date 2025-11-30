@@ -21,8 +21,8 @@
                 <button id="hipblas-modal-open" type="button" class="chip small legend-pill legend-pill-default">
                     hipBLASLt vs hblt0
                 </button>
-                <button id="rpc-modal-open" type="button" class="chip small legend-pill legend-pill-rpc">
-                    RPC · dual server
+                <button id="dual-modal-open" type="button" class="chip small legend-pill legend-pill-dual">
+                    Dual GPU
                 </button>
                 <button id="rocwmma-modal-open" type="button" class="chip small legend-pill legend-pill-rocwmma">
                     rocWMMA
@@ -103,18 +103,14 @@
         </div>
     </div>
 
-    <div id="rpc-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rpc-title">
+    <div id="dual-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dual-title">
         <div class="modal-content">
-            <button id="rpc-modal-close" class="modal-close" aria-label="Close dialog">×</button>
-            <h2 id="rpc-title">RPC · dual server</h2>
-            <p>These results were produced with two R9700 systems (each 32&nbsp;GB)
-                connected over 5&nbsp;Gbps Ethernet. One runs <code>rpc-server</code> from llama.cpp; the other runs
-                <code>llama-bench --rpc</code>.
-            </p>
-            <p>This setup allows distributed inference, splitting large GGUF models across both machines. The metric
-                shows what
-                you can expect when latency is limited by the network and the workload is balanced between two RPC
-                participants.</p>
+            <button id="dual-modal-close" class="modal-close" aria-label="Close dialog">×</button>
+            <h2 id="dual-title">Dual GPU (2x R9700)</h2>
+            <p>These results were produced using two AMD Radeon AI PRO R9700 GPUs (32GB each, 64GB total).</p>
+            <p>Models larger than ~30GB are automatically distributed across both GPUs using
+                <code>HIP_VISIBLE_DEVICES=0,1</code>. Smaller models run on a single GPU
+                (<code>HIP_VISIBLE_DEVICES=0</code>).</p>
         </div>
     </div>
 

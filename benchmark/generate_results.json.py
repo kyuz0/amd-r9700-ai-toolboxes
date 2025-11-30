@@ -4,7 +4,6 @@ from pathlib import Path
 
 RESULT_SOURCES = [
     ("results", False),       # regular single-node runs
-    ("results-rpc", True),    # distributed RPC runs across two servers
 ]
 OUT_JSON = "../docs/results.json"
 
@@ -64,18 +63,19 @@ def canonicalize_env(env):
 
 def parse_env_flags(basename):
     """
-    pattern: <model>__<env>[__fa1][__hblt0][__longctx32768][__rpc]
-    Returns (env, fa, context_tag, context_tokens, rpc_flag)
+    pattern: <model>__<env>[__fa1][__hblt0][__longctx32768][__rpc][__single][__dual]
+    Returns (env, fa, context_tag, context_tokens, rpc_flag, gpu_config)
     """
     parts = basename.split("__")
     if len(parts) < 2:
-        return None, False, "default", None, False
+        return None, False, "default", None, False, "single"
 
     env = parts[1]
     fa = False
     context_tag = "default"
     context_tokens = None
     rpc_flag = False
+    gpu_config = "single"  # default to single if not specified
 
     for raw_suffix in parts[2:]:
         suffix = raw_suffix.lower()
@@ -93,8 +93,12 @@ def parse_env_flags(basename):
                     context_tokens = None
         elif suffix == "rpc":
             rpc_flag = True
+        elif suffix == "single":
+            gpu_config = "single"
+        elif suffix == "dual":
+            gpu_config = "dual"
 
-    return env, fa, context_tag, context_tokens, rpc_flag
+    return env, fa, context_tag, context_tokens, rpc_flag, gpu_config
 
 def env_base_and_variant(env):
     # e.g. "rocm6_4_2-rocwmma" -> ("rocm6_4_2", "rocwmma")
@@ -178,7 +182,7 @@ for results_dir, is_rpc_source in RESULT_SOURCES:
             continue
 
         model_raw, _rest = base.split("__", 1)
-        env, fa_from_name, context_tag, context_tokens, rpc_flag = parse_env_flags(base)
+        env, fa_from_name, context_tag, context_tokens, rpc_flag, gpu_config = parse_env_flags(base)
         env = canonicalize_env(env)
         if env:
             envs.add(env)
@@ -276,6 +280,7 @@ for results_dir, is_rpc_source in RESULT_SOURCES:
                 "quant": quant,
                 "log": path,
                 "rpc": bool(is_rpc_source or rpc_flag),
+                "gpu_config": gpu_config,
                 "build": {"hash": build_hash, "number": build_num} if build_hash else None,
             }
             runs.append(run)
