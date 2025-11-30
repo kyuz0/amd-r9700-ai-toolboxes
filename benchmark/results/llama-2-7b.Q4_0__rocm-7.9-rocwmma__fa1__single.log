@@ -4,7 +4,7 @@ ggml_cuda_init: found 1 ROCm devices:
   Device 0: AMD Radeon Graphics, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |  1 |           pp512 |      4659.46 ± 86.39 |
-| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |  1 |           tg128 |         98.21 ± 0.03 |
+| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |  1 |           pp512 |      4591.90 ± 57.52 |
+| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |  1 |           tg128 |         98.38 ± 0.06 |
 
 build: fa0465954 (7205)
