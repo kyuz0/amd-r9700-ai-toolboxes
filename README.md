@@ -1,15 +1,12 @@
 # AMD R9700 Llama.cpp Toolboxes
 
-This project provides pre-built containers (“toolboxes”) for running LLMs on **AMD Radeon AI PRO R9700** GPUs. Toolbx is the standard developer container system in Fedora (and now works on Ubuntu, openSUSE, Arch, etc).
+This project provides pre-built containers (“toolboxes”) for running LLMs on **AMD Radeon AI PRO R9700** GPUs (gfx1201). Toolbx is the standard developer container system in Fedora (and now works on Ubuntu, openSUSE, Arch, etc).
 
-## 🚨 Updates — 2025-11-18
+## 🚨 Updates — 2025-11-30
 
 - Released new toolboxes for ROCm 7 that track the nightly builds, these are now called `nightly`. 
-- Updated and extended benchmakrs across all llama.cpp backend configurations, and included bennchmarks over RPC (two nodes) and long context (32k) -> [Interactive Benchmark Viewer](https://kyuz0.github.io/amd-r9700-toolboxes/)
+- Updated and extended benchmakrs across all llama.cpp backend configurations, and included bennchmarks over RPC (two nodes) and long context (32k) -> [Interactive Benchmark Viewer](https://kyuz0.github.io/amd-r9700-ai-toolboxes/)
 
-## Watch the YouTube Video
-
-[![Watch the YouTube Video](https://img.youtube.com/vi/wCBLMXgk3No/maxresdefault.jpg)](https://youtu.be/wCBLMXgk3No)  
 
 ## Table of Contents
 
@@ -267,7 +264,7 @@ HF_HUB_ENABLE_HF_TRANSFER=1 huggingface-cli download unsloth/Qwen3-Coder-30B-A3B
 
 ## 3. Performance Benchmarks
 
-🌐 Interactive exploration of the latest benchmark runs: [Interactie Benchmark Viewer](https://kyuz0.github.io/amd-r9700-toolboxes/)
+🌐 Interactive exploration of the latest benchmark runs: [Interactie Benchmark Viewer](https://kyuz0.github.io/amd-r9700-ai-toolboxes/)
 
 ## 4. Memory Planning & VRAM Estimator
 
