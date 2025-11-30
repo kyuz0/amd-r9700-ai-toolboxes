@@ -49,7 +49,18 @@ get_hblt_modes() {
 
 for MODEL_PATH in "${MODEL_PATHS[@]}"; do
   MODEL_NAME="$(basename "$MODEL_PATH" .gguf)"
-  MODEL_SIZE=$(stat -c%s "$MODEL_PATH")
+
+  if [[ "$MODEL_PATH" == *"-00001-of-"* ]]; then
+    # Multi-shard model: sum all shards
+    DIR="$(dirname "$MODEL_PATH")"
+    BASE="$(basename "$MODEL_PATH")"
+    PATTERN="${BASE/-00001-of-/-*-of-}"
+    MODEL_SIZE=$(find "$DIR" -maxdepth 1 -name "$PATTERN" -exec stat -c%s {} + | awk '{s+=$1} END {print s}')
+  else
+    # Single-file model
+    MODEL_SIZE=$(stat -c%s "$MODEL_PATH")
+  fi
+
   # Threshold: 30 GiB = 32212254720 bytes. Using 32000000000 as a safe cutoff.
   if (( MODEL_SIZE > 32000000000 )); then
     GPU_DEVICES="0,1"
