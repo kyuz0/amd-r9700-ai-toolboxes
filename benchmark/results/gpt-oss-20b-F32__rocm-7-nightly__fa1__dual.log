@@ -1,0 +1,11 @@
+ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+ggml_cuda_init: found 2 ROCm devices:
+  Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
+  Device 1: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
+| model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
+| gpt-oss 20B BF16               |  38.97 GiB |    20.91 B | ROCm       |  99 |  1 |           pp512 |     3219.67 ± 324.40 |
+| gpt-oss 20B BF16               |  38.97 GiB |    20.91 B | ROCm       |  99 |  1 |           tg128 |         61.41 ± 0.11 |
+
+build: fa0465954 (7205)
