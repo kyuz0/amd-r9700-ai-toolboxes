@@ -70,9 +70,9 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
       if [[ "$ENV" == rocm* ]]; then
         if [[ "$MODE" == off ]]; then
           BASE_SUFFIX="__hblt0"
-          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env HIP_VISIBLE_DEVICES=$GPU_DEVICES env ROCBLAS_USE_HIPBLASLT=0 }"
+          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env HIP_VISIBLE_DEVICES=$GPU_DEVICES ROCBLAS_USE_HIPBLASLT=0 }"
         else
-          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env HIP_VISIBLE_DEVICES=$GPU_DEVICES env ROCBLAS_USE_HIPBLASLT=1 }"
+          CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env HIP_VISIBLE_DEVICES=$GPU_DEVICES ROCBLAS_USE_HIPBLASLT=1 }"
         fi
       fi
 
