@@ -17,9 +17,10 @@ RUN set -euo pipefail; \
   | grep -o "therock-dist-linux-${GFX}-${ROCM_MAJOR_VER}\.[0-9]\+\.[0-9]\+rc[0-9]\{8\}\.tar\.gz" \
   | sort | tail -n1)"; \
   echo "Latest tarball: ${KEY}"; \
-  aria2c -x 16 -s 16 -j 16 --file-allocation=none "${BASE}/${KEY}" -o therock.tar.gz
-RUN mkdir -p /opt/rocm-7.0 \
-  && tar xzf therock.tar.gz -C /opt/rocm-7.0 --strip-components=1
+  aria2c -x 16 -s 16 -j 16 --file-allocation=none "${BASE}/${KEY}" -o therock.tar.gz \
+  && mkdir -p /opt/rocm-7.0 \
+  && tar xzf therock.tar.gz -C /opt/rocm-7.0 --strip-components=1 \
+  && rm -f therock.tar.gz
 
 ENV ROCM_PATH=/opt/rocm-7.0 \
   HIP_PLATFORM=amd \
@@ -54,7 +55,7 @@ RUN printf '%s\n' \
 
 WORKDIR /opt
 COPY ./build-rocwmma.sh .
-RUN chmod +x build-rocwmma.sh && ./build-rocwmma.sh
+RUN chmod +x build-rocwmma.sh && ./build-rocwmma.sh && rm -rf rocWMMA
 
 WORKDIR /opt/llama.cpp
 RUN git clone --recursive https://github.com/ggerganov/llama.cpp.git . \
