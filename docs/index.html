@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AMD Radeon AI PRO R9700 — Backend Benchmarks (Grid View)</title>
+    <link rel="stylesheet" href="assets/index2.css">
+</head>
+
+<body>
+    <header>
+        <h1>AMD Radeon AI PRO R9700 — Benchmark Grid</h1>
+        <p>AMD Radeon AI PRO R9700 · 32GB vRAM</p>
+        <p>Fedora 43 · Linux 6.17.8-300.fc43.x86_64 · llama.cpp build 1c398dc9e (7034)</p>
+        <p>Benchmarks captured 14 Nov 2025 · Repo: <a href="https://github.com/kyuz0/amd-r9700-toolboxes"
+                target="_blank" rel="noreferrer">kyuz0/amd-r9700-toolboxes</a></p>
+        <div class="legend">
+            <label>Legend</label>
+            <div class="legend-pills">
+                <button id="hipblas-modal-open" type="button" class="chip small legend-pill legend-pill-default">
+                    hipBLASLt vs hblt0
+                </button>
+                <button id="rpc-modal-open" type="button" class="chip small legend-pill legend-pill-rpc">
+                    RPC · dual server
+                </button>
+                <button id="rocwmma-modal-open" type="button" class="chip small legend-pill legend-pill-rocwmma">
+                    rocWMMA
+                </button>
+
+            </div>
+        </div>
+    </header>
+
+    <section class="controls">
+        <div class="control">
+            <label for="filter-search">Search models</label>
+            <input id="filter-search" type="text" placeholder="e.g. llama, qwen, 30B…">
+        </div>
+        <div class="control">
+            <label for="filter-quant">Quant</label>
+            <select id="filter-quant">
+                <option value="">Any</option>
+            </select>
+        </div>
+        <div class="control grow slider-block">
+            <label>Context windows</label>
+            <div id="context-chips" class="chip-row tight"></div>
+        </div>
+        <div class="control grow slider-block">
+            <label>Model params (B)</label>
+            <div class="range-wrap">
+                <input type="range" id="sizeLo" step="1">
+                <input type="range" id="sizeHi" step="1">
+                <div class="range-track" id="sizeTrack"></div>
+            </div>
+            <div class="range-values">
+                <span id="sizeLoVal">0B</span> – <span id="sizeHiVal">0B</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel compact">
+        <div class="panel-split">
+            <div class="backend-header">
+                <div class="backend-label">
+                    <label>Backends</label>
+                    <div class="backend-actions">
+                        <button type="button" id="backend-all" class="chip small">All</button>
+                        <button type="button" id="backend-none" class="chip small">None</button>
+                    </div>
+                </div>
+                <div id="backend-list" class="backend-list"></div>
+            </div>
+            <div class="stats-box">
+                <div class="stat-line" id="stats-line">Loading…</div>
+                <button id="reset-layout" type="button" class="chip small">Reset filters</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel compact" id="tables-panel">
+        <div id="tables"></div>
+    </section>
+
+    <div id="hipblas-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="hipblas-title">
+        <div class="modal-content">
+            <button id="hipblas-modal-close" class="modal-close" aria-label="Close dialog">×</button>
+            <h2 id="hipblas-title">hipBLASLt &amp; hblt0 explained</h2>
+            <p>The ROCm toolboxes ship with <code>ROCBLAS_USE_HIPBLASLT=1</code> by default. This forces rocBLAS to
+                prefer
+                the hipBLASLt kernel library, which historically delivered the best throughput on gfx1201 (R9700).</p>
+            <p>Rows tagged with <code>__hblt0</code> were re-run with <code>ROCBLAS_USE_HIPBLASLT=0</code>, letting
+                rocBLAS
+                auto-select between hipBLASLt, Tensile, or other kernel providers. These runs show how performance
+                shifts when
+                the tuned hipBLASLt path is disabled.</p>
+            <p>hipBLASLt is AMD's LT (low-level tuned) matmul backend, optimized for transformer workloads. Disabling it
+                can
+                expose regressions or improvements depending on driver versions, so both configurations are published
+                for
+                comparison.</p>
+        </div>
+    </div>
+
+    <div id="rpc-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rpc-title">
+        <div class="modal-content">
+            <button id="rpc-modal-close" class="modal-close" aria-label="Close dialog">×</button>
+            <h2 id="rpc-title">RPC · dual server</h2>
+            <p>These results were produced with two R9700 systems (each 32&nbsp;GB)
+                connected over 5&nbsp;Gbps Ethernet. One runs <code>rpc-server</code> from llama.cpp; the other runs
+                <code>llama-bench --rpc</code>.
+            </p>
+            <p>This setup allows distributed inference, splitting large GGUF models across both machines. The metric
+                shows what
+                you can expect when latency is limited by the network and the workload is balanced between two RPC
+                participants.</p>
+        </div>
+    </div>
+
+    <div id="rocwmma-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rocwmma-title">
+        <div class="modal-content">
+            <button id="rocwmma-modal-close" class="modal-close" aria-label="Close dialog">×</button>
+            <h2 id="rocwmma-title">rocWMMA variants</h2>
+            <p>Backends labeled <code>-rocwmma</code> are rebuilt with AMD's rocWMMA library, which unlocks matrix
+                multiply
+                pipelines accelerated via wave matrix multiply-accumulate (WMMA) instructions.</p>
+            <p>rocWMMA kernels can significantly accelerate BF16/F16 workloads on RDNA3 but may trade stability or
+                memory
+                usage; comparing plain toolboxes against <code>-rocwmma</code> ones highlights the benefit or cost.</p>
+        </div>
+    </div>
+
+
+
+    <script src="assets/index2.js" type="module"></script>
+</body>
+
+</html>
