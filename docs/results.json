@@ -1,8 +1,12 @@
 {
   "meta": {
-    "generated_at": "2025-11-30T13:47:18Z",
+    "generated_at": "2025-12-05T08:42:30Z",
     "os_kernel": "Fedora 42 \u2014 Linux 6.15.9-201.fc42.x86_64 (Sat Aug  2 11:37:34 UTC 2025)",
     "llamacpp_builds": [
+      {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      },
       {
         "hash": "fa0465954",
         "number": "7205"
@@ -3173,8 +3177,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 626.78,
-      "tps_std": 37.07,
+      "tps_mean": 35.87,
+      "tps_std": 0.1,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3187,39 +3191,7 @@
       "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm-7-nightly-rocwmma__fa1__dual.log",
       "rpc": false,
       "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm-7-nightly-rocwmma",
-      "env_base": "rocm",
-      "env_variant": "7-nightly-rocwmma",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "tg128",
-      "tps_mean": 30.2,
-      "tps_std": 1.77,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm-7-nightly-rocwmma__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
+      "build": null
     },
     {
       "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
@@ -3231,8 +3203,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 685.49,
-      "tps_std": 5.2,
+      "tps_mean": 925.06,
+      "tps_std": 3.97,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3246,8 +3218,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3260,7 +3232,7 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 28.41,
+      "tps_mean": 34.47,
       "tps_std": 0.01,
       "error": false,
       "error_type": null,
@@ -3275,8 +3247,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3289,8 +3261,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 743.42,
-      "tps_std": 3.3,
+      "tps_mean": 35.58,
+      "tps_std": 0.09,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3303,39 +3275,7 @@
       "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm-7-nightly__fa1__dual.log",
       "rpc": false,
       "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm-7-nightly",
-      "env_base": "rocm",
-      "env_variant": "7-nightly",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "tg128",
-      "tps_mean": 31.16,
-      "tps_std": 0.02,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm-7-nightly__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
+      "build": null
     },
     {
       "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
@@ -3347,8 +3287,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 694.68,
-      "tps_std": 3.35,
+      "tps_mean": 920.43,
+      "tps_std": 4.69,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3362,8 +3302,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3376,8 +3316,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 28.43,
-      "tps_std": 0.07,
+      "tps_mean": 34.54,
+      "tps_std": 0.01,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3391,8 +3331,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3405,8 +3345,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 734.08,
-      "tps_std": 2.84,
+      "tps_mean": 930.23,
+      "tps_std": 3.66,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3420,8 +3360,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3434,7 +3374,7 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 30.97,
+      "tps_mean": 37.72,
       "tps_std": 0.03,
       "error": false,
       "error_type": null,
@@ -3449,8 +3389,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3463,8 +3403,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 755.83,
-      "tps_std": 1.26,
+      "tps_mean": 967.56,
+      "tps_std": 1.62,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3478,8 +3418,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3492,7 +3432,7 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 31.0,
+      "tps_mean": 37.73,
       "tps_std": 0.02,
       "error": false,
       "error_type": null,
@@ -3507,8 +3447,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3521,8 +3461,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 734.14,
-      "tps_std": 1.52,
+      "tps_mean": 928.76,
+      "tps_std": 5.89,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3536,8 +3476,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3550,7 +3490,7 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 30.91,
+      "tps_mean": 37.94,
       "tps_std": 0.05,
       "error": false,
       "error_type": null,
@@ -3565,8 +3505,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3579,8 +3519,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 753.9,
-      "tps_std": 1.41,
+      "tps_mean": 971.69,
+      "tps_std": 3.83,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3594,8 +3534,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3608,7 +3548,239 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 31.08,
+      "tps_mean": 37.79,
+      "tps_std": 0.03,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm-7.9__hblt0__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4-rocwmma",
+      "env_base": "rocm6_4_4",
+      "env_variant": "rocwmma",
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "pp512",
+      "tps_mean": 922.99,
+      "tps_std": 11.27,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4-rocwmma",
+      "env_base": "rocm6_4_4",
+      "env_variant": "rocwmma",
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "tg128",
+      "tps_mean": 38.77,
+      "tps_std": 0.05,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4-rocwmma-hblt0",
+      "env_base": "rocm6_4_4",
+      "env_variant": "rocwmma-hblt0",
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "pp512",
+      "tps_mean": 897.76,
+      "tps_std": 4.81,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__hblt0__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4-rocwmma-hblt0",
+      "env_base": "rocm6_4_4",
+      "env_variant": "rocwmma-hblt0",
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "tg128",
+      "tps_mean": 34.5,
+      "tps_std": 0.03,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__hblt0__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4",
+      "env_base": "rocm6_4_4",
+      "env_variant": null,
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "pp512",
+      "tps_mean": 938.18,
+      "tps_std": 10.04,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4",
+      "env_base": "rocm6_4_4",
+      "env_variant": null,
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "tg128",
+      "tps_mean": 38.93,
+      "tps_std": 0.09,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4-hblt0",
+      "env_base": "rocm6_4_4",
+      "env_variant": "hblt0",
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "pp512",
+      "tps_mean": 900.84,
+      "tps_std": 3.43,
+      "error": false,
+      "error_type": null,
+      "backend": "ROCm",
+      "ngl": 99,
+      "mmap": null,
+      "params_b": 79.67,
+      "file_size_gib": 42.01,
+      "name_params_b": 79.67,
+      "quant": "Q4_K_XL",
+      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4__hblt0__fa1__dual.log",
+      "rpc": false,
+      "gpu_config": "dual",
+      "build": {
+        "hash": "03d9a77b8",
+        "number": "7278"
+      }
+    },
+    {
+      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
+      "env": "rocm6_4_4-hblt0",
+      "env_base": "rocm6_4_4",
+      "env_variant": "hblt0",
+      "fa": true,
+      "context": "default",
+      "context_tokens": null,
+      "test": "tg128",
+      "tps_mean": 34.54,
       "tps_std": 0.07,
       "error": false,
       "error_type": null,
@@ -3619,244 +3791,12 @@
       "file_size_gib": 42.01,
       "name_params_b": 79.67,
       "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm-7.9__hblt0__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4-rocwmma",
-      "env_base": "rocm6_4_4",
-      "env_variant": "rocwmma",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "pp512",
-      "tps_mean": 695.46,
-      "tps_std": 92.82,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4-rocwmma",
-      "env_base": "rocm6_4_4",
-      "env_variant": "rocwmma",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "tg128",
-      "tps_mean": 30.8,
-      "tps_std": 0.15,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4-rocwmma-hblt0",
-      "env_base": "rocm6_4_4",
-      "env_variant": "rocwmma-hblt0",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "pp512",
-      "tps_mean": 681.5,
-      "tps_std": 3.02,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__hblt0__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4-rocwmma-hblt0",
-      "env_base": "rocm6_4_4",
-      "env_variant": "rocwmma-hblt0",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "tg128",
-      "tps_mean": 27.4,
-      "tps_std": 0.02,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4-rocwmma__hblt0__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4",
-      "env_base": "rocm6_4_4",
-      "env_variant": null,
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "pp512",
-      "tps_mean": 751.32,
-      "tps_std": 4.65,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4",
-      "env_base": "rocm6_4_4",
-      "env_variant": null,
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "tg128",
-      "tps_mean": 31.3,
-      "tps_std": 0.02,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4-hblt0",
-      "env_base": "rocm6_4_4",
-      "env_variant": "hblt0",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "pp512",
-      "tps_mean": 690.73,
-      "tps_std": 4.44,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
       "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4__hblt0__fa1__dual.log",
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
-      }
-    },
-    {
-      "model": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "model_clean": "Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL",
-      "env": "rocm6_4_4-hblt0",
-      "env_base": "rocm6_4_4",
-      "env_variant": "hblt0",
-      "fa": true,
-      "context": "default",
-      "context_tokens": null,
-      "test": "tg128",
-      "tps_mean": 28.18,
-      "tps_std": 0.03,
-      "error": false,
-      "error_type": null,
-      "backend": "ROCm",
-      "ngl": 99,
-      "mmap": null,
-      "params_b": 79.67,
-      "file_size_gib": 42.01,
-      "name_params_b": 79.67,
-      "quant": "Q4_K_XL",
-      "log": "results/Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__rocm6_4_4__hblt0__fa1__dual.log",
-      "rpc": false,
-      "gpu_config": "dual",
-      "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3869,8 +3809,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 729.06,
-      "tps_std": 5.17,
+      "tps_mean": 908.21,
+      "tps_std": 2.86,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3884,8 +3824,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3898,8 +3838,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 30.87,
-      "tps_std": 0.03,
+      "tps_mean": 37.63,
+      "tps_std": 0.07,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3913,8 +3853,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3927,8 +3867,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 753.11,
-      "tps_std": 4.21,
+      "tps_mean": 935.46,
+      "tps_std": 5.91,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3942,8 +3882,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3956,8 +3896,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 31.02,
-      "tps_std": 0.02,
+      "tps_mean": 37.84,
+      "tps_std": 0.03,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -3971,8 +3911,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -3985,8 +3925,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 732.53,
-      "tps_std": 2.82,
+      "tps_mean": 911.83,
+      "tps_std": 4.32,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -4000,8 +3940,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -4014,8 +3954,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 31.05,
-      "tps_std": 0.04,
+      "tps_mean": 37.69,
+      "tps_std": 0.12,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -4029,8 +3969,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -4043,8 +3983,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 749.12,
-      "tps_std": 4.65,
+      "tps_mean": 943.82,
+      "tps_std": 7.26,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -4058,8 +3998,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -4072,8 +4012,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 31.14,
-      "tps_std": 0.05,
+      "tps_mean": 37.81,
+      "tps_std": 0.09,
       "error": false,
       "error_type": null,
       "backend": "ROCm",
@@ -4087,8 +4027,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -4101,8 +4041,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 355.82,
-      "tps_std": 1.33,
+      "tps_mean": 613.5,
+      "tps_std": 47.21,
       "error": false,
       "error_type": null,
       "backend": "Vulkan",
@@ -4116,8 +4056,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -4130,8 +4070,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 34.48,
-      "tps_std": 0.31,
+      "tps_mean": 53.23,
+      "tps_std": 0.27,
       "error": false,
       "error_type": null,
       "backend": "Vulkan",
@@ -4145,8 +4085,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -4159,8 +4099,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "pp512",
-      "tps_mean": 300.38,
-      "tps_std": 0.82,
+      "tps_mean": 478.78,
+      "tps_std": 58.68,
       "error": false,
       "error_type": null,
       "backend": "Vulkan",
@@ -4174,8 +4114,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
@@ -4188,8 +4128,8 @@
       "context": "default",
       "context_tokens": null,
       "test": "tg128",
-      "tps_mean": 24.41,
-      "tps_std": 0.31,
+      "tps_mean": 25.92,
+      "tps_std": 0.52,
       "error": false,
       "error_type": null,
       "backend": "Vulkan",
@@ -4203,8 +4143,8 @@
       "rpc": false,
       "gpu_config": "dual",
       "build": {
-        "hash": "fa0465954",
-        "number": "7205"
+        "hash": "03d9a77b8",
+        "number": "7278"
       }
     },
     {
