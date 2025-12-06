@@ -5,7 +5,7 @@ ggml_cuda_init: found 2 ROCm devices:
   Device 1: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |  1 |           pp512 |       1512.53 ± 2.86 |
-| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |  1 |           tg128 |          9.45 ± 0.00 |
+| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |  1 |           pp512 |       1493.04 ± 2.86 |
+| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |  1 |           tg128 |          9.44 ± 0.00 |
 
-build: fa0465954 (7205)
+build: 6016d0bd4 (7285)

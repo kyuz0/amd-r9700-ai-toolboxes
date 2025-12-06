@@ -5,7 +5,7 @@ ggml_cuda_init: found 2 ROCm devices:
   Device 1: AMD Radeon Graphics, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-| qwen3moe 30B.A3B Q8_0          |  33.51 GiB |    30.53 B | ROCm       |  99 |  1 |           pp512 |      2692.40 ± 14.09 |
-| qwen3moe 30B.A3B Q8_0          |  33.51 GiB |    30.53 B | ROCm       |  99 |  1 |           tg128 |         77.29 ± 0.23 |
+| qwen3moe 30B.A3B Q8_0          |  33.51 GiB |    30.53 B | ROCm       |  99 |  1 |           pp512 |      2683.21 ± 17.21 |
+| qwen3moe 30B.A3B Q8_0          |  33.51 GiB |    30.53 B | ROCm       |  99 |  1 |           tg128 |         76.97 ± 0.22 |
 
-build: fa0465954 (7205)
+build: 6016d0bd4 (7285)

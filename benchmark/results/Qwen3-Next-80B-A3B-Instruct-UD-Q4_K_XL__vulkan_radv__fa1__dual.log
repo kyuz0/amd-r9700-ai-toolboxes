@@ -6,7 +6,7 @@ ggml_vulkan: 1 = AMD Radeon AI PRO R9700 (RADV GFX1201) (radv) | uma: 0 | fp16: 
 ggml_vulkan: 2 = AMD Radeon AI PRO R9700 (RADV GFX1201) (radv) | uma: 0 | fp16: 1 | bf16: 1 | warp size: 64 | shared memory: 65536 | int dot: 1 | matrix cores: KHR_coopmat
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-| qwen3next ?B Q4_K - Medium     |  42.01 GiB |    79.67 B | Vulkan     |  99 |  1 |           pp512 |       478.78 ± 58.68 |
-| qwen3next ?B Q4_K - Medium     |  42.01 GiB |    79.67 B | Vulkan     |  99 |  1 |           tg128 |         25.92 ± 0.52 |
+| qwen3next ?B Q4_K - Medium     |  42.01 GiB |    79.67 B | Vulkan     |  99 |  1 |           pp512 |       413.79 ± 31.74 |
+| qwen3next ?B Q4_K - Medium     |  42.01 GiB |    79.67 B | Vulkan     |  99 |  1 |           tg128 |         29.61 ± 0.27 |
 
-build: 03d9a77b8 (7278)
+build: 6016d0bd4 (7285)

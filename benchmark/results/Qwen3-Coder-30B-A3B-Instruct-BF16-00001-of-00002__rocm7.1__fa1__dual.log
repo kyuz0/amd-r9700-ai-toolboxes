@@ -5,7 +5,21 @@ ggml_cuda_init: found 2 ROCm devices:
   Device 1: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-| qwen3moe 30B.A3B BF16          |  56.89 GiB |    30.53 B | ROCm       |  99 |  1 |           pp512 |      1629.33 ± 67.83 |
-| qwen3moe 30B.A3B BF16          |  56.89 GiB |    30.53 B | ROCm       |  99 |  1 |           tg128 |         57.58 ± 0.05 |
-
-build: fa0465954 (7205)
+/opt/llama.cpp/ggml/src/ggml-cuda/ggml-cuda.cu:92: ROCm error
+/usr/local/lib64/libggml-base.so.0(+0x3565) [0x7fa4cecdb565]
+/usr/local/lib64/libggml-base.so.0(ggml_print_backtrace+0x1eb) [0x7fa4cecdb92b]
+/usr/local/lib64/libggml-base.so.0(ggml_abort+0x11f) [0x7fa4cecdbaaf]
+/usr/local/lib64/libggml-hip.so.0(+0x2fd1ef2) [0x7fa4d1d69ef2]
+/usr/local/lib64/libggml-hip.so.0(+0x2fdca9a) [0x7fa4d1d74a9a]
+/usr/local/lib64/libggml-hip.so.0(+0x2fd716f) [0x7fa4d1d6f16f]
+/usr/local/lib64/libggml-base.so.0(ggml_backend_sched_graph_compute_async+0x7f3) [0x7fa4cecf5f63]
+/usr/local/lib64/libllama.so.0(_ZN13llama_context13graph_computeEP11ggml_cgraphb+0xa0) [0x7fa4d2437a90]
+/usr/local/lib64/libllama.so.0(_ZN13llama_context14process_ubatchERK12llama_ubatch14llm_graph_typeP22llama_memory_context_iR11ggml_status+0xe2) [0x7fa4d2439722]
+/usr/local/lib64/libllama.so.0(_ZN13llama_context6decodeERK11llama_batch+0x3bf) [0x7fa4d243e5df]
+/usr/local/lib64/libllama.so.0(llama_decode+0xe) [0x7fa4d243f3fe]
+/usr/local/bin/llama-bench() [0x40acdb]
+/usr/local/bin/llama-bench() [0x408a7d]
+/lib64/libc.so.6(+0x35b5) [0x7fa4ce6715b5]
+/lib64/libc.so.6(__libc_start_main+0x88) [0x7fa4ce671668]
+/usr/local/bin/llama-bench() [0x409b65]
+✖ ! [rocm7.1] Qwen3-Coder-30B-A3B-Instruct-BF16-00001-of-00002__fa1 failed (exit 0)
