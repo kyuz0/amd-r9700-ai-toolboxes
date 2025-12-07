@@ -42,7 +42,9 @@ COPY patches/mmf.cuh /tmp/mmf.cuh
 # build
 RUN git clean -xdf \
     && git submodule update --recursive \
-    && find . -name mmf.cuh -exec cp /tmp/mmf.cuh {} \; \
+    && count=$(find . -name mmf.cuh -exec cp /tmp/mmf.cuh {} \; -print | wc -l) \
+    && if [ "$count" -eq 0 ]; then echo "ERROR: mmf.cuh not found! Patch failed."; exit 1; fi \
+    && echo "SUCCESS: Patched $count instance(s) of mmf.cuh" \
     && cmake -S . -B build \
     -DGGML_HIP=ON \
     -DAMDGPU_TARGETS=gfx1201 \
