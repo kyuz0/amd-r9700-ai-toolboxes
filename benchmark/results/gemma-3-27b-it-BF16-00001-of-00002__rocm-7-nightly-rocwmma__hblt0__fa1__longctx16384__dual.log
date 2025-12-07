@@ -1,0 +1,29 @@
+ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+ggml_cuda_init: found 2 ROCm devices:
+  Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
+  Device 1: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
+| model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
+/opt/llama.cpp/ggml/src/ggml-cuda/ggml-cuda.cu:92: ROCm error
+/usr/local/lib64/libggml-base.so.0(+0x3565) [0x7f0d6ba72565]
+/usr/local/lib64/libggml-base.so.0(ggml_print_backtrace+0x1eb) [0x7f0d6ba7292b]
+/usr/local/lib64/libggml-base.so.0(ggml_abort+0x11f) [0x7f0d6ba72aaf]
+/usr/local/lib64/libggml-hip.so.0(+0x2cb5eb2) [0x7f0d6e7e4eb2]
+/usr/local/lib64/libggml-hip.so.0(+0x2cca317) [0x7f0d6e7f9317]
+/usr/local/lib64/libggml-hip.so.0(+0x2cc892c) [0x7f0d6e7f792c]
+/usr/local/lib64/libggml-hip.so.0(+0x2cc7af3) [0x7f0d6e7f6af3]
+/usr/local/lib64/libggml-hip.so.0(+0x2cc258a) [0x7f0d6e7f158a]
+/usr/local/lib64/libggml-hip.so.0(+0x2cbe8d4) [0x7f0d6e7ed8d4]
+/usr/local/lib64/libggml-hip.so.0(+0x2cbb0ef) [0x7f0d6e7ea0ef]
+/usr/local/lib64/libggml-base.so.0(ggml_backend_sched_graph_compute_async+0x7f3) [0x7f0d6ba8cf63]
+/usr/local/lib64/libllama.so.0(_ZN13llama_context13graph_computeEP11ggml_cgraphb+0xa0) [0x7f0d6eeaea90]
+/usr/local/lib64/libllama.so.0(_ZN13llama_context14process_ubatchERK12llama_ubatch14llm_graph_typeP22llama_memory_context_iR11ggml_status+0xe2) [0x7f0d6eeb0722]
+/usr/local/lib64/libllama.so.0(_ZN13llama_context6decodeERK11llama_batch+0x3bf) [0x7f0d6eeb55df]
+/usr/local/lib64/libllama.so.0(llama_decode+0xe) [0x7f0d6eeb63fe]
+/usr/local/bin/llama-bench() [0x40acdb]
+/usr/local/bin/llama-bench() [0x4087ec]
+/lib64/libc.so.6(+0x35b5) [0x7f0d6b4085b5]
+/lib64/libc.so.6(__libc_start_main+0x88) [0x7f0d6b408668]
+/usr/local/bin/llama-bench() [0x409b65]
+✖ ! [rocm-7-nightly-rocwmma] gemma-3-27b-it-BF16-00001-of-00002__hblt0__fa1 __longctx16384 failed (exit 0)
