@@ -10,6 +10,7 @@ TOOLBOXES["llama-vulkan-radv"]="docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv 
 TOOLBOXES["llama-rocm-6.4.4"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-6.4.4 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 TOOLBOXES["llama-rocm-6.4.4-rocwmma"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-6.4.4-rocwmma --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 TOOLBOXES["llama-rocm-7.1.1"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.1.1 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
+TOOLBOXES["llama-rocm-7.1.1-mmf"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.1.1-mmf --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 TOOLBOXES["llama-rocm-7.1.1-rocwmma"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.1.1-rocwmma --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 TOOLBOXES["llama-rocm-7.9"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.9 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 TOOLBOXES["llama-rocm-7.9-rocwmma"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.9-rocwmma --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
