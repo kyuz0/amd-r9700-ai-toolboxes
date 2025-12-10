@@ -2,6 +2,10 @@
 
 This project provides pre-built containers (“toolboxes”) for running LLMs on **AMD Radeon AI PRO R9700** GPUs (gfx1201). It uses `toolbox` (standard on Fedora, available on Ubuntu, Arch, etc.) to run `llama.cpp` with full GPU acceleration (Vulkan or ROCm) without messing up your host system.
 
+## Watch the YouTube Video
+
+[![Watch the YouTube Video](https://img.youtube.com/vi/dgyqBUD71lg/maxresdefault.jpg)](https://youtu.be/dgyqBUD71lg) 
+
 ## 🚀 Quick Start
 
 ### 1. Create a Toolbox
