@@ -5,25 +5,7 @@ ggml_cuda_init: found 2 ROCm devices:
   Device 1: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
-/opt/llama.cpp/ggml/src/ggml-cuda/ggml-cuda.cu:92: ROCm error
-/usr/local/lib64/libggml-base.so.0(+0x3565) [0x7f292267c565]
-/usr/local/lib64/libggml-base.so.0(ggml_print_backtrace+0x1eb) [0x7f292267c92b]
-/usr/local/lib64/libggml-base.so.0(ggml_abort+0x11f) [0x7f292267caaf]
-/usr/local/lib64/libggml-hip.so.0(+0x2da2e22) [0x7f29254dbe22]
-/usr/local/lib64/libggml-hip.so.0(+0x2db7287) [0x7f29254f0287]
-/usr/local/lib64/libggml-hip.so.0(+0x2db589c) [0x7f29254ee89c]
-/usr/local/lib64/libggml-hip.so.0(+0x2db4a63) [0x7f29254eda63]
-/usr/local/lib64/libggml-hip.so.0(+0x2daf4fa) [0x7f29254e84fa]
-/usr/local/lib64/libggml-hip.so.0(+0x2dab844) [0x7f29254e4844]
-/usr/local/lib64/libggml-hip.so.0(+0x2da805f) [0x7f29254e105f]
-/usr/local/lib64/libggml-base.so.0(ggml_backend_sched_graph_compute_async+0x7f3) [0x7f2922696f63]
-/usr/local/lib64/libllama.so.0(_ZN13llama_context13graph_computeEP11ggml_cgraphb+0xa0) [0x7f2925ba5a90]
-/usr/local/lib64/libllama.so.0(_ZN13llama_context14process_ubatchERK12llama_ubatch14llm_graph_typeP22llama_memory_context_iR11ggml_status+0xe2) [0x7f2925ba7722]
-/usr/local/lib64/libllama.so.0(_ZN13llama_context6decodeERK11llama_batch+0x3bf) [0x7f2925bac5df]
-/usr/local/lib64/libllama.so.0(llama_decode+0xe) [0x7f2925bad3fe]
-/usr/local/bin/llama-bench() [0x40acdb]
-/usr/local/bin/llama-bench() [0x4087ec]
-/lib64/libc.so.6(+0x35b5) [0x7f29220125b5]
-/lib64/libc.so.6(__libc_start_main+0x88) [0x7f2922012668]
-/usr/local/bin/llama-bench() [0x409b65]
-✖ ! [rocm-7-nightly] gemma-3-27b-it-BF16-00001-of-00002__hblt0__fa1 __longctx16384 failed (exit 0)
+| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d16384 |        169.11 ± 0.00 |
+| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d16384 |         10.15 ± 0.00 |
+
+build: 2aa45ef9e (7423)

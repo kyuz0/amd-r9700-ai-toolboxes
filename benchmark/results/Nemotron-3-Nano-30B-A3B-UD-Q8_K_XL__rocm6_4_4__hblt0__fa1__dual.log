@@ -1,0 +1,11 @@
+ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+ggml_cuda_init: found 2 ROCm devices:
+  Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
+  Device 1: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
+| model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
+| nemotron_h_moe 31B.A3.5B Q8_0  |  37.66 GiB |    31.58 B | ROCm       |  99 |  1 |           pp512 |       1724.03 ± 6.57 |
+| nemotron_h_moe 31B.A3.5B Q8_0  |  37.66 GiB |    31.58 B | ROCm       |  99 |  1 |           tg128 |         79.98 ± 0.37 |
+
+build: 2aa45ef9e (7423)

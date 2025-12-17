@@ -6,7 +6,7 @@ ggml_vulkan: 1 = AMD Radeon AI PRO R9700 (AMD open-source driver) | uma: 0 | fp1
 ggml_vulkan: 2 = AMD Ryzen 9 9900X3D 12-Core Processor (AMD open-source driver) | uma: 1 | fp16: 1 | bf16: 0 | warp size: 32 | shared memory: 32768 | int dot: 1 | matrix cores: none
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-| gemma3 4B Q3_K - Small         |   1.80 GiB |     3.88 B | Vulkan     |  99 |  1 |           pp512 |      2699.08 ± 10.03 |
-| gemma3 4B Q3_K - Small         |   1.80 GiB |     3.88 B | Vulkan     |  99 |  1 |           tg128 |        113.64 ± 0.07 |
+| gemma3 4B Q3_K - Small         |   1.80 GiB |     3.88 B | Vulkan     |  99 |  1 |           pp512 |       3545.06 ± 9.40 |
+| gemma3 4B Q3_K - Small         |   1.80 GiB |     3.88 B | Vulkan     |  99 |  1 |           tg128 |        115.38 ± 0.10 |
 
-build: 6016d0bd4 (7285)
+build: 2aa45ef9e (7423)

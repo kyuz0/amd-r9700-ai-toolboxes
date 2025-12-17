@@ -4,7 +4,7 @@ ggml_cuda_init: found 1 ROCm devices:
   Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |  1 |           pp512 |       2544.26 ± 1.34 |
-| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |  1 |           tg128 |         19.82 ± 0.00 |
+| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |  1 |           pp512 |       2603.81 ± 5.27 |
+| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |  1 |           tg128 |         22.28 ± 0.00 |
 
-build: 22577583a (7312)
+build: 2aa45ef9e (7423)

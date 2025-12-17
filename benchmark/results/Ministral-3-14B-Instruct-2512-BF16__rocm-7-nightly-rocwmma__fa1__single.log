@@ -4,17 +4,7 @@ ggml_cuda_init: found 1 ROCm devices:
   Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -: | --------------: | -------------------: |
-/opt/llama.cpp/ggml/src/ggml-cuda/ggml-cuda.cu:92: ROCm error
-/usr/local/lib64/libggml-base.so.0(+0x3565) [0x7f3606f80565]
-/usr/local/lib64/libggml-base.so.0(ggml_print_backtrace+0x1eb) [0x7f3606f8092b]
-/usr/local/lib64/libggml-base.so.0(ggml_abort+0x11f) [0x7f3606f80aaf]
-/usr/local/lib64/libggml-hip.so.0(+0x2cb5eb2) [0x7f3609cf2eb2]
-/usr/local/lib64/libggml-hip.so.0(+0x2cbb07e) [0x7f3609cf807e]
-/usr/local/lib64/libggml-base.so.0(ggml_backend_sched_synchronize+0x2e) [0x7f3606f97a1e]
-/usr/local/lib64/libllama.so.0(_ZN13llama_context11synchronizeEv+0x10) [0x7f360a3bbd70]
-/usr/local/bin/llama-bench() [0x40acfc]
-/usr/local/bin/llama-bench() [0x408a7d]
-/lib64/libc.so.6(+0x35b5) [0x7f36069165b5]
-/lib64/libc.so.6(__libc_start_main+0x88) [0x7f3606916668]
-/usr/local/bin/llama-bench() [0x409b65]
-✖ ! [rocm-7-nightly-rocwmma] Ministral-3-14B-Instruct-2512-BF16__fa1 failed (exit 0)
+| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |  1 |           pp512 |      2843.52 ± 16.68 |
+| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |  1 |           tg128 |         22.18 ± 0.00 |
+
+build: 2aa45ef9e (7423)

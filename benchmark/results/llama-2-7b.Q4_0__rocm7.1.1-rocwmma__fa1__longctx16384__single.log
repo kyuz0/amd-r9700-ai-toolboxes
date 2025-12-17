@@ -4,7 +4,7 @@ ggml_cuda_init: found 1 ROCm devices:
   Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
-| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d16384 |        870.43 ± 0.00 |
-| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d16384 |         38.44 ± 0.00 |
+| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d16384 |        977.20 ± 0.00 |
+| llama 7B Q4_0                  |   3.56 GiB |     6.74 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d16384 |         42.21 ± 0.00 |
 
-build: 22577583a (7312)
+build: 2aa45ef9e (7423)

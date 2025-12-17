@@ -3,7 +3,9 @@ ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
 ggml_cuda_init: found 2 ROCm devices:
   Device 0: AMD Radeon Graphics, gfx1201 (0x1201), VMM: no, Wave Size: 32
   Device 1: AMD Radeon Graphics, gfx1201 (0x1201), VMM: no, Wave Size: 32
-Hip error: 'out of memory'(2) at /therock/src/rocm-libraries/projects/hipblaslt/library/src/amd_detail/hipblaslt.cpp:147
 | model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
-✖ ! [rocm-7.9] gemma-3-27b-it-BF16-00001-of-00002__fa1 __longctx16384 failed (exit 0)
+| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d16384 |        956.66 ± 0.00 |
+| gemma3 27B BF16                |  50.31 GiB |    27.01 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d16384 |         10.33 ± 0.00 |
+
+build: 2aa45ef9e (7423)

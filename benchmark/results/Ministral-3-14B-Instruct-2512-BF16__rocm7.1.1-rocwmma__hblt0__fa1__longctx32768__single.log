@@ -2,7 +2,9 @@ ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
 ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
 ggml_cuda_init: found 1 ROCm devices:
   Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32
-main: error: failed to create context with model '/home/kyuz0/models/Ministral-3-14B-Instruct-2512-BF16.gguf'
 | model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
-✖ ! [rocm7.1.1-rocwmma] Ministral-3-14B-Instruct-2512-BF16__hblt0__fa1 __longctx32768 failed (exit 0)
+| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d32768 |        213.47 ± 0.00 |
+| mistral3 14B BF16              |  25.16 GiB |    13.51 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d32768 |         18.45 ± 0.00 |
+
+build: 2aa45ef9e (7423)

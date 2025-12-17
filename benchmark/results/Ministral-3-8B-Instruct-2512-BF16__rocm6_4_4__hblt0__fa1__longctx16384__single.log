@@ -5,6 +5,6 @@ ggml_cuda_init: found 1 ROCm devices:
 | model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
 | mistral3 8B BF16               |  15.81 GiB |     8.49 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d16384 |        433.90 ± 0.00 |
-| mistral3 8B BF16               |  15.81 GiB |     8.49 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d16384 |         27.78 ± 0.00 |
+| mistral3 8B BF16               |  15.81 GiB |     8.49 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d16384 |         30.85 ± 0.00 |
 
-build: 6016d0bd4 (7285)
+build: 2aa45ef9e (7423)

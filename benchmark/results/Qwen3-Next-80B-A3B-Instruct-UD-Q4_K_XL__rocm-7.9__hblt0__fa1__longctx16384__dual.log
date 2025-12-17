@@ -5,21 +5,7 @@ ggml_cuda_init: found 2 ROCm devices:
   Device 1: AMD Radeon Graphics, gfx1201 (0x1201), VMM: no, Wave Size: 32
 | model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
-/opt/llama.cpp/ggml/src/ggml.c:1679: GGML_ASSERT(obj_new) failed
-/usr/local/lib64/libggml-base.so.0(+0x3565) [0x7fb1e0233565]
-/usr/local/lib64/libggml-base.so.0(ggml_print_backtrace+0x1eb) [0x7fb1e023392b]
-/usr/local/lib64/libggml-base.so.0(ggml_abort+0x11f) [0x7fb1e0233aaf]
-/usr/local/lib64/libggml-base.so.0(+0x4921) [0x7fb1e0234921]
-/usr/local/lib64/libggml-base.so.0(ggml_view_4d+0x2e) [0x7fb1e023a0ce]
-/usr/local/lib64/libllama.so.0(_ZN19llm_build_qwen3next24build_delta_net_chunkingEP11ggml_tensorS1_S1_S1_S1_S1_S1_S1_i+0xf16) [0x7fb1e3ac47e6]
-/usr/local/lib64/libllama.so.0(_ZN19llm_build_qwen3next23build_layer_attn_linearEP18llm_graph_input_rsP11ggml_tensorS3_S3_i+0xff8) [0x7fb1e3ac7468]
-/usr/local/lib64/libllama.so.0(_ZN19llm_build_qwen3nextC1ERK11llama_modelRK16llm_graph_params+0x16e) [0x7fb1e3ac790e]
-/usr/local/lib64/libllama.so.0(_ZNK11llama_model11build_graphERK16llm_graph_params+0x90b) [0x7fb1e39ff0cb]
-/usr/local/lib64/libllama.so.0(_ZN13llama_context13graph_reserveEjjjPK22llama_memory_context_ib+0xfa) [0x7fb1e39919fa]
-/usr/local/lib64/libllama.so.0(_ZN13llama_contextC2ERK11llama_model20llama_context_params+0x103e) [0x7fb1e39947ae]
-/usr/local/lib64/libllama.so.0(llama_init_from_model+0x100) [0x7fb1e3995250]
-/usr/local/bin/llama-bench() [0x4077bb]
-/lib64/libc.so.6(+0x35b5) [0x7fb1dfbc95b5]
-/lib64/libc.so.6(__libc_start_main+0x88) [0x7fb1dfbc9668]
-/usr/local/bin/llama-bench() [0x409b65]
-✖ ! [rocm-7.9] Qwen3-Next-80B-A3B-Instruct-UD-Q4_K_XL__hblt0__fa1 __longctx16384 failed (exit 0)
+| qwen3next 80B.A3B Q4_K - Medium |  42.01 GiB |    79.67 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d16384 |        850.81 ± 0.00 |
+| qwen3next 80B.A3B Q4_K - Medium |  42.01 GiB |    79.67 B | ROCm       |  99 |     2048 |  1 |   tg32 @ d16384 |         34.84 ± 0.00 |
+
+build: 2aa45ef9e (7423)
