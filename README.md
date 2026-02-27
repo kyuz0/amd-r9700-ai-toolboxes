@@ -21,10 +21,10 @@ toolbox create llama-vulkan-radv \
   -- --device /dev/dri --group-add video --security-opt seccomp=unconfined
 ```
 
-**Option B: ROCm (7.1)**
+**Option B: ROCm (7.2)**
 ```bash
-toolbox create llama-rocm-7.1-rocwmma \
-  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.1-rocwmma \
+toolbox create llama-rocm-7.2 \
+  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2 \
   -- --device /dev/dri --device /dev/kfd \
   --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined
 ```
@@ -34,7 +34,7 @@ toolbox create llama-rocm-7.1-rocwmma \
 ### 2. Enter the Toolbox
 ```bash
 toolbox enter llama-vulkan-radv
-# or: toolbox enter llama-rocm-7.1-rocwmma
+# or: toolbox enter llama-rocm-7.2
 ```
 
 ### 3. Download a Model
@@ -95,10 +95,10 @@ llama-server -m models/qwen3-coder-30B-A3B/BF16/Qwen3-Coder-30B-A3B-Instruct-BF1
 #### Ubuntu Users (Distrobox)
 If you are on Ubuntu, use Distrobox to ensure proper GPU access:
 ```bash
-distrobox create -n llama-rocm-7.1 \
-  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.1-rocwmma \
+distrobox create -n llama-rocm-7.2 \
+  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2 \
   --additional-flags "--device /dev/kfd --device /dev/dri --group-add video --group-add render --security-opt seccomp=unconfined"
-distrobox enter llama-rocm-7.1
+distrobox enter llama-rocm-7.2
 ```
 
 #### Updating Toolboxes
@@ -108,7 +108,7 @@ To pull the latest images and recreate your toolboxes (useful when Llama.cpp upd
 ./refresh-toolboxes.sh all
 
 # Or refresh specific ones
-./refresh-toolboxes.sh llama-vulkan-radv llama-rocm-7.1-rocwmma
+./refresh-toolboxes.sh llama-vulkan-radv llama-rocm-7.2
 ```
 
 ## 📦 Architecture & Containers
@@ -118,19 +118,17 @@ To pull the latest images and recreate your toolboxes (useful when Llama.cpp upd
     *   **RADV (Mesa)**: Best compatibility.
     *   **AMDVLK**: Official AMD driver. Faster in some cases but has a strict 2GB single buffer limit (some large models won't load).
 *   **ROCm**: AMD's compute stack (CUDA-like).
-    *   **ROCWMMA**: Variants with optimizations for RDNA3 matrix cores (better Flash Attention).
 
 ### Supported Container Images
 Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolboxes/tags) and automatically rebuilt on Llama.cpp updates.
 
 | Tag | Backend | Notes |
 | :--- | :--- | :--- |
-| `vulkan-radv` | Vulkan (Mesa) | **Recommended**. Most stable. |
-| `vulkan-amdvlk` | Vulkan (AMDVLK) | Fast, but strict memory limits. |
-| `rocm-7.1-rocwmma` | ROCm 7.1 + ROCWMMA | Good balance of features and stability. |
-| `rocm-7.9-rocwmma` | ROCm 7.9.0 + ROCWMMA | Newer ROCm release. |
-| `rocm-7-nightly-rocwmma` | ROCm 7 Nightly | Bleeding edge. |
-| `rocm-6.4.4` | ROCm 6.4.4 | Stable release. |
+| `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and all models. |
+| `vulkan-amdvlk` | Vulkan (AMDVLK) | Fastest backend—AMD open-source driver. ≤2 GiB single buffer allocation limit, some large models won't load. |
+| `rocm-6.4.4` | ROCm 6.4.4 (Fedora 43) | Latest stable 6.x build. Uses Fedora 43 packages with backported patch for kernel 6.18.4+ support. |
+| `rocm-7.2` | ROCm 7.2 | Latest stable 7.x build. Includes patch for kernel 6.18.4+ support. |
+| `rocm7-nightlies` | ROCm 7 Nightlies | Nightly build for ROCm 7. |
 
 ## ⚡ Performance & Planning
 
