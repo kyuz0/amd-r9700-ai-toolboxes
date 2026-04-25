@@ -4,9 +4,9 @@ FROM registry.fedoraproject.org/fedora:43 AS builder
 # rocm 7.2 repo
 RUN <<'EOF'
 tee /etc/yum.repos.d/rocm.repo <<REPO
-[ROCm-7.2]
-name=ROCm7.2
-baseurl=https://repo.radeon.com/rocm/el9/7.2/main
+[ROCm-7.2.1]
+name=ROCm7.2.1
+baseurl=https://repo.radeon.com/rocm/rhel10/7.2.1/main
 enabled=1
 priority=50
 gpgcheck=1
@@ -67,9 +67,9 @@ FROM registry.fedoraproject.org/fedora-minimal:43
 # rocm 7.2 repo
 RUN <<'EOF'
 tee /etc/yum.repos.d/rocm.repo <<REPO
-[ROCm-7.2]
-name=ROCm7.2
-baseurl=https://repo.radeon.com/rocm/el9/7.2/main
+[ROCm-7.2.1]
+name=ROCm7.2.1
+baseurl=https://repo.radeon.com/rocm/rhel10/7.2.1/main
 enabled=1
 priority=50
 gpgcheck=1
@@ -83,7 +83,7 @@ RUN microdnf -y --nodocs --setopt=install_weak_deps=0 \
   install \
   bash ca-certificates libatomic libstdc++ libgcc libgomp sudo \
   hip-runtime-amd rocblas hipblas \
-  rocminfo radeontop \
+  rocminfo radeontop procps-ng \
   && microdnf clean all && rm -rf /var/cache/dnf/*
 
 # copy
