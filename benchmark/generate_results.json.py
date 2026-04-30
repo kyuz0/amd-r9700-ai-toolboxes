@@ -63,7 +63,7 @@ def canonicalize_env(env):
 
 def parse_env_flags(basename):
     """
-    pattern: <model>__<env>[__fa1][__hblt0][__longctx32768][__rpc][__single][__dual]
+    pattern: <model>__<env>[__fa1][__longctx32768][__rpc][__single][__dual]
     Returns (env, fa, context_tag, context_tokens, rpc_flag, gpu_config)
     """
     parts = basename.split("__")
@@ -81,8 +81,6 @@ def parse_env_flags(basename):
         suffix = raw_suffix.lower()
         if suffix == "fa1":
             fa = True
-        elif suffix == "hblt0":
-            env = f"{env}-hblt0"
         elif suffix.startswith("longctx"):
             context_tag = suffix
             m = LONGCTX_RE.search(suffix)

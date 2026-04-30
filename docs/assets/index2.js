@@ -667,7 +667,7 @@ function backendValue(entry, direction) {
 
 function splitEnvName(env) {
     const canonical = env.replace(/_/g, ".");
-    const tagRegex = /-(rocwmma-improved|rocwmma|improved|hblt0)/gi;
+    const tagRegex = /-(rocwmma-improved|rocwmma|improved)/gi;
     const tags = [];
     let match;
     while ((match = tagRegex.exec(canonical)) !== null) {

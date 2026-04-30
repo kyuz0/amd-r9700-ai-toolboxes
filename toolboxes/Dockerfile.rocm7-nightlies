@@ -48,7 +48,6 @@ RUN printf '%s\n' \
   'export LIBRARY_PATH="$HIP_LIB_PATH:$ROCM_PATH/lib:$ROCM_PATH/lib64"' \
   'export CPATH="$HIP_INCLUDE_PATH"' \
   'export PKG_CONFIG_PATH="$ROCM_PATH/lib/pkgconfig"' \
-  'export ROCBLAS_USE_HIPBLASLT=1' \
   > /etc/profile.d/rocm.sh \
   && chmod +x /etc/profile.d/rocm.sh \
   && echo 'source /etc/profile.d/rocm.sh' >> /etc/bashrc
@@ -112,7 +111,6 @@ RUN printf '%s\n' \
   'export LIBRARY_PATH="$HIP_LIB_PATH:$ROCM_PATH/lib:$ROCM_PATH/lib64"' \
   'export CPATH="$HIP_INCLUDE_PATH"' \
   'export PKG_CONFIG_PATH="$ROCM_PATH/lib/pkgconfig"' \
-  'export ROCBLAS_USE_HIPBLASLT=1' \
   > /etc/profile.d/rocm.sh \
   && chmod +x /etc/profile.d/rocm.sh \
   && echo 'source /etc/profile.d/rocm.sh' >> /etc/bashrc
