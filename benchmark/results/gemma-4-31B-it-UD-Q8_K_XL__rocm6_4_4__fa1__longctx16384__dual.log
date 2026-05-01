@@ -1,0 +1,8 @@
+ggml_cuda_init: found 2 ROCm devices (Total VRAM: 65248 MiB):
+  Device 0: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32, VRAM: 32624 MiB
+  Device 1: AMD Radeon AI PRO R9700, gfx1201 (0x1201), VMM: no, Wave Size: 32, VRAM: 32624 MiB
+| model                          |       size |     params | backend    | ngl | n_ubatch | fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | -: | --------------: | -------------------: |
+| gemma4 31B Q8_0                |  32.60 GiB |    30.70 B | ROCm       |  99 |     2048 |  1 | pp2048 @ d16384 |        483.30 ± 0.00 |
+Memory access fault by GPU node-2 (Agent handle: 0x36e06650) on address 0x7f782fe07000. Reason: Page not present or supervisor privilege.
+✖ ! [rocm6_4_4] gemma-4-31B-it-UD-Q8_K_XL__fa1 __longctx16384 failed (exit 0)
