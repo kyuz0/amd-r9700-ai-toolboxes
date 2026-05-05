@@ -1,0 +1,30 @@
+WARNING: radv is not a conformant Vulkan implementation, testing use only.
+WARNING: radv is not a conformant Vulkan implementation, testing use only.
+ggml_vulkan: Found 3 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon AI PRO R9700 (AMD open-source driver) | uma: 0 | fp16: 1 | bf16: 0 | warp size: 64 | shared memory: 32768 | int dot: 1 | matrix cores: KHR_coopmat
+ggml_vulkan: 1 = AMD Radeon AI PRO R9700 (AMD open-source driver) | uma: 0 | fp16: 1 | bf16: 0 | warp size: 64 | shared memory: 32768 | int dot: 1 | matrix cores: KHR_coopmat
+ggml_vulkan: 2 = AMD Ryzen 9 9900X3D 12-Core Processor (AMD open-source driver) | uma: 1 | fp16: 1 | bf16: 0 | warp size: 32 | shared memory: 32768 | int dot: 1 | matrix cores: none
+/lib64/libggml-base.so.0(+0x4465) [0x7fa0ccf97465]
+/lib64/libggml-base.so.0(ggml_print_backtrace+0x1eb) [0x7fa0ccf9783b]
+/lib64/libggml-base.so.0(+0x16f19) [0x7fa0ccfa9f19]
+/lib64/libstdc++.so.6(+0x1ebfc) [0x7fa0ccd3abfc]
+/lib64/libstdc++.so.6(_ZSt10unexpectedv+0x0) [0x7fa0ccd24d3a]
+/lib64/libstdc++.so.6(+0x1eea8) [0x7fa0ccd3aea8]
+/lib64/libggml-vulkan.so.0(+0x15af9) [0x7fa0cd06aaf9]
+/lib64/libggml-vulkan.so.0(+0x12e448) [0x7fa0cd183448]
+/lib64/libggml-vulkan.so.0(+0x143bb5) [0x7fa0cd198bb5]
+/lib64/libggml-vulkan.so.0(+0x1455ad) [0x7fa0cd19a5ad]
+/lib64/libggml-vulkan.so.0(+0x147ff1) [0x7fa0cd19cff1]
+/lib64/libggml-base.so.0(ggml_backend_sched_graph_compute_async+0x7f3) [0x7fa0ccfb35d3]
+/lib64/libllama.so.0(_ZN13llama_context13graph_computeEP11ggml_cgraphb+0xa0) [0x7fa0d0de6c70]
+/lib64/libllama.so.0(_ZN13llama_context14process_ubatchERK12llama_ubatch14llm_graph_typeP22llama_memory_context_iR11ggml_status+0xe5) [0x7fa0d0de9255]
+/lib64/libllama.so.0(_ZN13llama_context6decodeERK11llama_batch+0x35f) [0x7fa0d0def98f]
+/lib64/libllama.so.0(llama_decode+0xe) [0x7fa0d0df132e]
+/usr/sbin/llama-bench() [0x40663b]
+/usr/sbin/llama-bench() [0x4038b9]
+/lib64/libc.so.6(+0x35b5) [0x7fa0cca0b5b5]
+/lib64/libc.so.6(__libc_start_main+0x88) [0x7fa0cca0b668]
+/usr/sbin/llama-bench() [0x404e65]
+terminate called after throwing an instance of 'vk::DeviceLostError'
+  what():  vk::Queue::submit: ErrorDeviceLost
+✖ ! [vulkan_amdvlk] Devstral-2-123B-Instruct-2512-Q3_K_S-00001-of-00002__fa1 __longctx65536 failed (exit 0)
