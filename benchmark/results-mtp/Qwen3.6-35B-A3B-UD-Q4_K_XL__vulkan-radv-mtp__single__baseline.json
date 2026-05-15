@@ -1,0 +1,99 @@
+{
+  "model": "Qwen3.6-35B-A3B-UD-Q4_K_XL",
+  "gguf": "Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf",
+  "toolbox": "vulkan-radv-mtp",
+  "mode": "baseline",
+  "spec_flags": "(none)",
+  "timestamp": "2026-05-15T11:31:37.183802",
+  "results": [
+    {
+      "name": "code_python",
+      "wall_s": 6.122,
+      "predicted_n": 192,
+      "predicted_per_second": 41.06,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "code_cpp",
+      "wall_s": 3.924,
+      "predicted_n": 192,
+      "predicted_per_second": 58.14,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "explain_concept",
+      "wall_s": 4.04,
+      "predicted_n": 192,
+      "predicted_per_second": 50.23,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "summarize",
+      "wall_s": 4.853,
+      "predicted_n": 192,
+      "predicted_per_second": 41.95,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "qa_factual",
+      "wall_s": 3.476,
+      "predicted_n": 192,
+      "predicted_per_second": 59.15,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "translation",
+      "wall_s": 3.97,
+      "predicted_n": 192,
+      "predicted_per_second": 51.07,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "creative_short",
+      "wall_s": 4.667,
+      "predicted_n": 192,
+      "predicted_per_second": 43.46,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "stepwise_math",
+      "wall_s": 3.442,
+      "predicted_n": 192,
+      "predicted_per_second": 59.77,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    },
+    {
+      "name": "long_code_review",
+      "wall_s": 4.739,
+      "predicted_n": 192,
+      "predicted_per_second": 58.4,
+      "draft_n": 0,
+      "draft_n_accepted": 0,
+      "accept_rate": null
+    }
+  ],
+  "aggregate": {
+    "n_requests": 9,
+    "total_predicted": 1728,
+    "total_draft": 0,
+    "total_draft_accepted": 0,
+    "aggregate_accept_rate": null,
+    "wall_s_total": 39.23
+  }
+}
