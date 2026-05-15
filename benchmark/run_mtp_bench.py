@@ -30,7 +30,7 @@ from urllib.error import URLError
 
 TOOLBOXES = {
     "rocm-7.2.3-mtp": {
-        "image": "docker.io/kyuz0/amd-r9700-ai-toolboxes:rocm-7.2.3-mtp",
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.3-mtp",
         "engine_args": [
             "--device", "/dev/dri",
             "--device", "/dev/kfd",
@@ -40,7 +40,7 @@ TOOLBOXES = {
         ],
     },
     "vulkan-radv-mtp": {
-        "image": "docker.io/kyuz0/amd-r9700-ai-toolboxes:vulkan-radv-mtp",
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv-mtp",
         "engine_args": [
             "--device", "/dev/dri",
             "--group-add", "video",

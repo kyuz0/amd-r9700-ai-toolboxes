@@ -16,14 +16,14 @@ This project provides pre-built containers (“toolboxes”) for running LLMs on
 
 **Option A: Vulkan (RADV) [Recommended]**
 ```bash
-toolbox create llama-vulkan-radv \
+toolbox create r9700-llama-vulkan-radv \
   --image docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv \
   -- --device /dev/dri --group-add video --security-opt seccomp=unconfined
 ```
 
 **Option B: ROCm (7.2.3)**
 ```bash
-toolbox create llama-rocm-7.2.3 \
+toolbox create r9700-llama-rocm-7.2.3 \
   --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.3 \
   -- --device /dev/dri --device /dev/kfd \
   --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined
@@ -33,8 +33,8 @@ toolbox create llama-rocm-7.2.3 \
 
 ### 2. Enter the Toolbox
 ```bash
-toolbox enter llama-vulkan-radv
-# or: toolbox enter llama-rocm-7.2.3
+toolbox enter r9700-llama-vulkan-radv
+# or: toolbox enter r9700-llama-rocm-7.2.3
 ```
 
 ### 3. Download a Model
@@ -95,10 +95,10 @@ llama-server -m models/qwen3-coder-30B-A3B/BF16/Qwen3-Coder-30B-A3B-Instruct-BF1
 #### Ubuntu Users (Distrobox)
 If you are on Ubuntu, use Distrobox to ensure proper GPU access:
 ```bash
-distrobox create -n llama-rocm-7.2.3 \
+distrobox create -n r9700-llama-rocm-7.2.3 \
   --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.3 \
   --additional-flags "--device /dev/kfd --device /dev/dri --group-add video --group-add render --security-opt seccomp=unconfined"
-distrobox enter llama-rocm-7.2.3
+distrobox enter r9700-llama-rocm-7.2.3
 ```
 
 #### Updating Toolboxes
@@ -108,7 +108,7 @@ To pull the latest images and recreate your toolboxes (useful when Llama.cpp upd
 ./refresh-toolboxes.sh all
 
 # Or refresh specific ones
-./refresh-toolboxes.sh llama-vulkan-radv llama-rocm-7.2.3
+./refresh-toolboxes.sh r9700-llama-vulkan-radv r9700-llama-rocm-7.2.3
 ```
 
 ## 📦 Architecture & Containers
