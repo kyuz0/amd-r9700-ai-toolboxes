@@ -1,0 +1,128 @@
+{
+  "model": "Qwen3.6-35B-A3B-UD-Q4_K_XL",
+  "gguf": "Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf",
+  "toolbox": "rocm-7.2.3",
+  "mode": "mtp-3",
+  "spec_flags": "--spec-type draft-mtp --spec-draft-n-max 3 -np 1",
+  "timestamp": "2026-05-17T11:12:42.034943",
+  "results": [
+    {
+      "name": "code_python",
+      "wall_s": 1.95,
+      "prompt_n": 30,
+      "prompt_ms": 433.71,
+      "prompt_per_second": 69.17,
+      "predicted_n": 192,
+      "predicted_per_second": 127.79,
+      "draft_n": 174,
+      "draft_n_accepted": 133,
+      "accept_rate": 0.7644
+    },
+    {
+      "name": "code_cpp",
+      "wall_s": 1.65,
+      "prompt_n": 40,
+      "prompt_ms": 78.38,
+      "prompt_per_second": 510.36,
+      "predicted_n": 192,
+      "predicted_per_second": 123.97,
+      "draft_n": 181,
+      "draft_n_accepted": 130,
+      "accept_rate": 0.7182
+    },
+    {
+      "name": "explain_concept",
+      "wall_s": 1.842,
+      "prompt_n": 27,
+      "prompt_ms": 66.36,
+      "prompt_per_second": 406.85,
+      "predicted_n": 192,
+      "predicted_per_second": 109.54,
+      "draft_n": 204,
+      "draft_n_accepted": 122,
+      "accept_rate": 0.598
+    },
+    {
+      "name": "summarize",
+      "wall_s": 1.442,
+      "prompt_n": 62,
+      "prompt_ms": 91.61,
+      "prompt_per_second": 676.8,
+      "predicted_n": 192,
+      "predicted_per_second": 144.49,
+      "draft_n": 155,
+      "draft_n_accepted": 139,
+      "accept_rate": 0.8968
+    },
+    {
+      "name": "qa_factual",
+      "wall_s": 1.591,
+      "prompt_n": 24,
+      "prompt_ms": 64.12,
+      "prompt_per_second": 374.32,
+      "predicted_n": 192,
+      "predicted_per_second": 127.67,
+      "draft_n": 175,
+      "draft_n_accepted": 132,
+      "accept_rate": 0.7543
+    },
+    {
+      "name": "translation",
+      "wall_s": 1.706,
+      "prompt_n": 25,
+      "prompt_ms": 64.66,
+      "prompt_per_second": 386.64,
+      "predicted_n": 192,
+      "predicted_per_second": 118.64,
+      "draft_n": 189,
+      "draft_n_accepted": 127,
+      "accept_rate": 0.672
+    },
+    {
+      "name": "creative_short",
+      "wall_s": 1.838,
+      "prompt_n": 21,
+      "prompt_ms": 63.34,
+      "prompt_per_second": 331.53,
+      "predicted_n": 192,
+      "predicted_per_second": 109.57,
+      "draft_n": 207,
+      "draft_n_accepted": 122,
+      "accept_rate": 0.5894
+    },
+    {
+      "name": "stepwise_math",
+      "wall_s": 1.651,
+      "prompt_n": 60,
+      "prompt_ms": 84.85,
+      "prompt_per_second": 707.14,
+      "predicted_n": 192,
+      "predicted_per_second": 124.32,
+      "draft_n": 183,
+      "draft_n_accepted": 130,
+      "accept_rate": 0.7104
+    },
+    {
+      "name": "long_code_review",
+      "wall_s": 2.299,
+      "prompt_n": 731,
+      "prompt_ms": 533.52,
+      "prompt_per_second": 1370.14,
+      "predicted_n": 192,
+      "predicted_per_second": 110.27,
+      "draft_n": 193,
+      "draft_n_accepted": 126,
+      "accept_rate": 0.6528
+    }
+  ],
+  "aggregate": {
+    "n_requests": 9,
+    "total_predicted": 1728,
+    "total_draft": 1661,
+    "total_draft_accepted": 1161,
+    "aggregate_accept_rate": 0.699,
+    "wall_s_total": 15.97,
+    "total_prompt_tokens": 1020,
+    "avg_prompt_per_second": 536.99
+  }
+}
