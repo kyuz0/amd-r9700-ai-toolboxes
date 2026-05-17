@@ -29,8 +29,8 @@ from urllib.error import URLError
 # ── Toolbox definitions ──────────────────────────────────────────────────────
 
 TOOLBOXES = {
-    "rocm-7.2.3-mtp": {
-        "image": "docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.3-mtp",
+    "rocm-7.2.3": {
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.3",
         "engine_args": [
             "--device", "/dev/dri",
             "--device", "/dev/kfd",
@@ -39,8 +39,8 @@ TOOLBOXES = {
             "--security-opt", "seccomp=unconfined",
         ],
     },
-    "vulkan-radv-mtp": {
-        "image": "docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv-mtp",
+    "vulkan-radv": {
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv",
         "engine_args": [
             "--device", "/dev/dri",
             "--group-add", "video",
@@ -416,8 +416,10 @@ def print_summary(results_dir: Path):
         prompts = r.get("results", [])
         if prompts:
             r["_avg_toks"] = sum(p.get("predicted_per_second", 0) for p in prompts) / len(prompts)
+            r["_avg_prompt_toks"] = sum(p.get("prompt_per_second", 0) for p in prompts) / len(prompts)
         else:
             r["_avg_toks"] = 0
+            r["_avg_prompt_toks"] = 0
 
     # Build baseline lookup for speedup calculation
     baselines = {}
@@ -458,9 +460,11 @@ def print_summary(results_dir: Path):
             "model": r["model"],
             "toolbox": r["toolbox"],
             "mode": r["mode"],
+            "avg_prompt_tok_s": round(r.get("_avg_prompt_toks", 0), 2),
             "avg_tok_s": round(r["_avg_toks"], 1),
             "accept_rate": agg.get("aggregate_accept_rate"),
             "wall_s_total": agg.get("wall_s_total"),
+            "results": r.get("results", []),
         })
 
     summary_path = results_dir / "summary.json"
