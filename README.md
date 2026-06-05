@@ -21,10 +21,10 @@ toolbox create r9700-llama-vulkan-radv \
   -- --device /dev/dri --group-add video --security-opt seccomp=unconfined
 ```
 
-**Option B: ROCm (7.2.3)**
+**Option B: ROCm (7.2.4)**
 ```bash
-toolbox create r9700-llama-rocm-7.2.3 \
-  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.3 \
+toolbox create r9700-llama-rocm-7.2.4 \
+  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.4 \
   -- --device /dev/dri --device /dev/kfd \
   --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined
 ```
@@ -34,7 +34,7 @@ toolbox create r9700-llama-rocm-7.2.3 \
 ### 2. Enter the Toolbox
 ```bash
 toolbox enter r9700-llama-vulkan-radv
-# or: toolbox enter r9700-llama-rocm-7.2.3
+# or: toolbox enter r9700-llama-rocm-7.2.4
 ```
 
 ### 3. Download a Model
@@ -95,10 +95,10 @@ llama-server -m models/qwen3-coder-30B-A3B/BF16/Qwen3-Coder-30B-A3B-Instruct-BF1
 #### Ubuntu Users (Distrobox)
 If you are on Ubuntu, use Distrobox to ensure proper GPU access:
 ```bash
-distrobox create -n r9700-llama-rocm-7.2.3 \
-  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.3 \
+distrobox create -n r9700-llama-rocm-7.2.4 \
+  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.4 \
   --additional-flags "--device /dev/kfd --device /dev/dri --group-add video --group-add render --security-opt seccomp=unconfined"
-distrobox enter r9700-llama-rocm-7.2.3
+distrobox enter r9700-llama-rocm-7.2.4
 ```
 
 #### Updating Toolboxes
@@ -108,7 +108,7 @@ To pull the latest images and recreate your toolboxes (useful when Llama.cpp upd
 ./refresh-toolboxes.sh all
 
 # Or refresh specific ones
-./refresh-toolboxes.sh r9700-llama-vulkan-radv r9700-llama-rocm-7.2.3
+./refresh-toolboxes.sh r9700-llama-vulkan-radv r9700-llama-rocm-7.2.4
 ```
 
 ## 📦 Architecture & Containers
@@ -127,7 +127,7 @@ Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolb
 | `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and all models. |
 | `vulkan-amdvlk` | Vulkan (AMDVLK) | Fastest backend—AMD open-source driver. ≤2 GiB single buffer allocation limit, some large models won't load. |
 | `rocm-6.4.4` | ROCm 6.4.4 (Fedora 43) | Latest stable 6.x build. Uses Fedora 43 packages with backported patch for kernel 6.18.4+ support. |
-| `rocm-7.2.3` | ROCm 7.2.3 | Latest stable 7.x build. |
+| `rocm-7.2.4` | ROCm 7.2.4 | Latest stable 7.x build. |
 | `rocm7-nightlies` | ROCm 7 Nightlies | Nightly build for ROCm 7. |
 
 ## ⚡ Performance & Planning
