@@ -26,10 +26,8 @@ done
 echo
 
 declare -A CMDS=(
-  [rocm6_4_4]="toolbox run -c r9700-llama-rocm-6.4.4 -- /usr/local/bin/llama-bench"
-  [rocm7_2_4]="toolbox run -c r9700-llama-rocm-7.2.4 -- /usr/local/bin/llama-bench"
-  [rocm7_nightlies]="toolbox run -c r9700-llama-rocm7-nightlies -- /usr/local/bin/llama-bench"
-  [vulkan_amdvlk]="toolbox run -c r9700-llama-vulkan-amdvlk -- /usr/sbin/llama-bench"
+  [rocm7_14]="toolbox run -c r9700-llama-rocm-7.14 -- /usr/local/bin/llama-bench"
+  [therock_nightly]="toolbox run -c r9700-llama-therock-nightly -- /usr/local/bin/llama-bench"
   [vulkan_radv]="toolbox run -c r9700-llama-vulkan-radv -- /usr/sbin/llama-bench"
 )
 
@@ -60,7 +58,7 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
     CMD="${CMDS[$ENV]}"
     CMD_EFFECTIVE="$CMD"
 
-    if [[ "$ENV" == rocm* ]]; then
+    if [[ "$ENV" == rocm* || "$ENV" == therock_nightly ]]; then
       CMD_EFFECTIVE="${CMD_EFFECTIVE/-- /-- env HIP_VISIBLE_DEVICES=$GPU_DEVICES }"
     fi
 

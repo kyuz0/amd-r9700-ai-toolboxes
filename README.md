@@ -12,7 +12,7 @@ This project provides pre-built containers (“toolboxes”) for running LLMs on
 **Which backend to choose?**
 *   **Vulkan (RADV)**: Recommended for **stability**. It works reliably with almost all models.
 *   **ROCm**: Recommended for **maximum performance**.
-    *   *Note*: Multiple ROCm versions are available (e.g., 6.4.4, 7.1, 7.9). Performance can vary significantly depending on the model architecture (e.g., Llama vs. Qwen). **Check the [Benchmarks](https://kyuz0.github.io/amd-r9700-ai-toolboxes/)** to find the best version for your model.
+    *   **ROCm 7.14** is the stable release. **TheRock nightly** tracks AMD's latest multi-arch nightly build. Performance can vary depending on the model architecture, so check the [Benchmarks](https://kyuz0.github.io/amd-r9700-ai-toolboxes/).
 
 **Option A: Vulkan (RADV) [Recommended]**
 ```bash
@@ -21,10 +21,10 @@ toolbox create r9700-llama-vulkan-radv \
   -- --device /dev/dri --group-add video --security-opt seccomp=unconfined
 ```
 
-**Option B: ROCm (7.2.4)**
+**Option B: ROCm 7.14**
 ```bash
-toolbox create r9700-llama-rocm-7.2.4 \
-  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.4 \
+toolbox create r9700-llama-rocm-7.14 \
+  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.14 \
   -- --device /dev/dri --device /dev/kfd \
   --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined
 ```
@@ -34,7 +34,7 @@ toolbox create r9700-llama-rocm-7.2.4 \
 ### 2. Enter the Toolbox
 ```bash
 toolbox enter r9700-llama-vulkan-radv
-# or: toolbox enter r9700-llama-rocm-7.2.4
+# or: toolbox enter r9700-llama-rocm-7.14
 ```
 
 ### 3. Download a Model
@@ -95,10 +95,10 @@ llama-server -m models/qwen3-coder-30B-A3B/BF16/Qwen3-Coder-30B-A3B-Instruct-BF1
 #### Ubuntu Users (Distrobox)
 If you are on Ubuntu, use Distrobox to ensure proper GPU access:
 ```bash
-distrobox create -n r9700-llama-rocm-7.2.4 \
-  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.4 \
+distrobox create -n r9700-llama-rocm-7.14 \
+  --image docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.14 \
   --additional-flags "--device /dev/kfd --device /dev/dri --group-add video --group-add render --security-opt seccomp=unconfined"
-distrobox enter r9700-llama-rocm-7.2.4
+distrobox enter r9700-llama-rocm-7.14
 ```
 
 #### Updating Toolboxes
@@ -108,7 +108,7 @@ To pull the latest images and recreate your toolboxes (useful when Llama.cpp upd
 ./refresh-toolboxes.sh all
 
 # Or refresh specific ones
-./refresh-toolboxes.sh r9700-llama-vulkan-radv r9700-llama-rocm-7.2.4
+./refresh-toolboxes.sh r9700-llama-vulkan-radv r9700-llama-rocm-7.14
 ```
 
 ## 📦 Architecture & Containers
@@ -116,8 +116,7 @@ To pull the latest images and recreate your toolboxes (useful when Llama.cpp upd
 ### Backends
 *   **Vulkan**: Cross-platform, very stable.
     *   **RADV (Mesa)**: Best compatibility.
-    *   **AMDVLK**: Official AMD driver. Faster in some cases but has a strict 2GB single buffer limit (some large models won't load).
-*   **ROCm**: AMD's compute stack (CUDA-like).
+*   **ROCm**: AMD's compute stack, available as the stable ROCm 7.14 Core SDK and the latest TheRock nightly.
 
 ### Supported Container Images
 Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolboxes/tags) and automatically rebuilt on Llama.cpp updates.
@@ -125,10 +124,8 @@ Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolb
 | Tag | Backend | Notes |
 | :--- | :--- | :--- |
 | `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and all models. |
-| `vulkan-amdvlk` | Vulkan (AMDVLK) | Fastest backend—AMD open-source driver. ≤2 GiB single buffer allocation limit, some large models won't load. |
-| `rocm-6.4.4` | ROCm 6.4.4 (Fedora 43) | Latest stable 6.x build. Uses Fedora 43 packages with backported patch for kernel 6.18.4+ support. |
-| `rocm-7.2.4` | ROCm 7.2.4 | Latest stable 7.x build. |
-| `rocm7-nightlies` | ROCm 7 Nightlies | Nightly build for ROCm 7. |
+| `rocm-7.14` | ROCm 7.14 Core SDK (Fedora 44) | Stable multi-arch ROCm build using AMD's supported `gfx1201` package set. |
+| `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-arch `gfx1201` nightly tarball. |
 
 ## ⚡ Performance & Planning
 

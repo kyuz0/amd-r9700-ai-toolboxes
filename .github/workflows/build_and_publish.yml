@@ -5,7 +5,7 @@ on:
     inputs:
       backends:
         description: >
-          Comma-separated backends to build (e.g. "rocm-7beta,rocm-7rc").
+          Comma-separated backends to build (rocm-7.14, therock-nightly, vulkan-radv).
           Use "all" to build everything.
         required: false
         default: all
@@ -28,7 +28,7 @@ jobs:
           IN='${{ inputs.backends }}'
 
           if [[ "$IN" == "all" || -z "$IN" ]]; then
-            JSON='["rocm-6.4.4","rocm-7.2.4","rocm7-nightlies","vulkan-amdvlk","vulkan-radv"]'
+            JSON='["rocm-7.14","therock-nightly","vulkan-radv"]'
           else
             # Remove spaces and build JSON array from comma list
             IN_CLEAN=$(echo "$IN" | tr -d '[:space:]')
@@ -89,7 +89,7 @@ jobs:
           docker build --no-cache -t "${LI}" -f "${DF}" .
 
           echo "→ Running smoke test..."
-          docker run --rm "${LI}" llama version
+          docker run --rm "${LI}" bash -c "if command -v llama >/dev/null; then llama version; else llama-cli --version; fi"
           docker run --rm "${LI}" llama-cli --help || { status=$?; echo "llama-cli exited with status $status"; [[ $status -eq 0 || $status -eq 1 || $status -eq 134 ]]; }
           docker run --rm "${LI}" llama-server --help || { status=$?; echo "llama-server exited with status $status"; [[ $status -eq 0 || $status -eq 1 || $status -eq 134 ]]; }
 

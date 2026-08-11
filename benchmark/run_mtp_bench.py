@@ -9,7 +9,7 @@ and collects structured JSON results.
 Usage:
     python run_mtp_bench.py                          # run everything
     python run_mtp_bench.py --model "Qwen3.6-35B"    # filter by model name
-    python run_mtp_bench.py --toolbox vulkan-radv-mtp # filter by toolbox
+    python run_mtp_bench.py --toolbox vulkan-radv     # filter by toolbox
     python run_mtp_bench.py --models-dir /path/to/models
     python run_mtp_bench.py --port 8081
 """
@@ -29,8 +29,18 @@ from urllib.error import URLError
 # ── Toolbox definitions ──────────────────────────────────────────────────────
 
 TOOLBOXES = {
-    "rocm-7.2.4": {
-        "image": "docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.2.4",
+    "rocm-7.14": {
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.14",
+        "engine_args": [
+            "--device", "/dev/dri",
+            "--device", "/dev/kfd",
+            "--group-add", "video",
+            "--group-add", "render",
+            "--security-opt", "seccomp=unconfined",
+        ],
+    },
+    "therock-nightly": {
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:therock-nightly",
         "engine_args": [
             "--device", "/dev/dri",
             "--device", "/dev/kfd",
@@ -481,7 +491,7 @@ def main():
     ap.add_argument("--model", type=str, default=None,
                     help="Filter: only run models whose name contains this string")
     ap.add_argument("--toolbox", type=str, default=None,
-                    help="Filter: only run this toolbox (e.g. 'vulkan-radv-mtp')")
+                    help="Filter: only run this toolbox (e.g. 'vulkan-radv')")
     ap.add_argument("--port", type=int, default=8080,
                     help="Port for llama-server (default: 8080)")
     args = ap.parse_args()

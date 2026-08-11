@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       backends:
-        description: Comma-separated backends to prune (e.g. "rocm-7beta,rocm-7rc") or "all"
+        description: Comma-separated backends to prune (rocm-7.14, therock-nightly, vulkan-radv) or "all"
         default: all
       keep:
         description: Number of latest tags to keep
         default: "3"
   workflow_run:
-    workflows: ["Build & Publish AMD Strix Halo Toolboxes"]
+    workflows: ["Build & Publish AMD R9700 Toolboxes"]
     types: [completed]   # runs after success/failure/cancel
     branches: [main]     
 
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NS: kyuz0
-      REPO: docker.io/kyuz0/amd-r9700-toolboxes
+      REPO: amd-r9700-toolboxes
     steps:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -44,7 +44,7 @@ jobs:
         run: |
           IN='${{ github.event.inputs.backends }}'
           if [[ "$IN" == "all" || -z "$IN" ]]; then
-            JSON='["rocm-6.4.4","rocm-7.2.4","rocm-7.2.4-mtp","rocm7-nightlies","vulkan-amdvlk","vulkan-radv","vulkan-radv-mtp"]'
+            JSON='["rocm-7.14","therock-nightly","vulkan-radv"]'
           else
             IN_CLEAN=$(echo "$IN" | tr -d '[:space:]')
             JSON='["'${IN_CLEAN//,/\",\"}'"]'
