@@ -125,7 +125,7 @@ Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolb
 | :--- | :--- | :--- |
 | `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and all models. |
 | `rocm-7.14` | ROCm 7.14 Core SDK (Fedora 44) | Stable multi-arch ROCm build using AMD's supported `gfx1201` package set. |
-| `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-arch `gfx1201` nightly tarball. |
+| `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-arch `gfx120X-all` nightly tarball for RDNA 4 (`gfx1200`/`gfx1201`). |
 
 ## ⚡ Performance & Planning
 

@@ -6,9 +6,9 @@ RUN dnf -y --nodocs --setopt=install_weak_deps=False install \
   radeontop git vim curl ninja-build tar xz aria2 \
   && dnf clean all && rm -rf /var/cache/dnf/*
 
-# Fetch the latest TheRock multi-arch Linux nightly for gfx1201.
+# Fetch the latest TheRock multi-arch Linux nightly for RDNA 4 (gfx1200/gfx1201).
 WORKDIR /tmp
-ARG GFX=gfx1201
+ARG GFX=gfx120X-all
 RUN set -euo pipefail; \
   BASE="https://rocm.nightlies.amd.com/tarball-multi-arch"; \
   KEY="$(curl -fsSL "${BASE}/" \
