@@ -73,6 +73,16 @@ Use **`llama-cli`** for running models directly in your terminal—ideal for qui
 
 Use **`llama-server`** to start an OpenAI-compatible API server. This allows you to connect third-party UIs (like Open WebUI), use the built-in web interface, or build your own applications using standard libraries.
 
+Every toolbox also includes the pinned, checksum-verified `amdgpu_top` package for
+live GPU utilization, VRAM, temperature, and power monitoring. The toolbox must be
+created with `/dev/dri` passed through, as shown above. Inside the toolbox, run:
+
+```bash
+amdgpu_top
+# or the compact view:
+amdgpu_top --smi
+```
+
 **Run it (CLI Chat):**
 ```bash
 llama-cli -ngl 999 -fa 1 \

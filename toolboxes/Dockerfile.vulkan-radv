@@ -3,11 +3,16 @@ FROM registry.fedoraproject.org/fedora:43 AS builder
 
 # deps
 RUN dnf -y --nodocs --setopt=install_weak_deps=False install \
-      git vim \
+      git vim curl \
       make gcc cmake ninja-build lld clang clang-devel compiler-rt libcurl-devel \
       vulkan-loader-devel vulkaninfo mesa-vulkan-drivers \
       spirv-headers-devel radeontop glslc \
     && dnf clean all && rm -rf /var/cache/dnf/*
+
+COPY fetch-amdgpu-top-rpm.sh /tmp/fetch-amdgpu-top-rpm
+RUN chmod 0755 /tmp/fetch-amdgpu-top-rpm \
+ && /tmp/fetch-amdgpu-top-rpm /tmp/amdgpu_top.rpm \
+ && rm -f /tmp/fetch-amdgpu-top-rpm
 
 # llama.cpp
 WORKDIR /opt/llama.cpp
@@ -39,11 +44,14 @@ RUN chmod +x /usr/local/bin/gguf-vram-estimator.py
 # runtime stage
 FROM registry.fedoraproject.org/fedora-minimal:43
 
+COPY --from=builder /tmp/amdgpu_top.rpm /tmp/amdgpu_top.rpm
+
 # runtime deps
 RUN microdnf -y --nodocs --setopt=install_weak_deps=0 install \
       bash ca-certificates libatomic libstdc++ libgcc \
       vulkan-loader vulkan-loader-devel vulkaninfo mesa-vulkan-drivers radeontop procps-ng \
-  && microdnf clean all && rm -rf /var/cache/dnf/*
+      /tmp/amdgpu_top.rpm \
+  && microdnf clean all && rm -rf /var/cache/dnf/* /tmp/amdgpu_top.rpm
 
 # copy
 COPY --from=builder /usr/ /usr/

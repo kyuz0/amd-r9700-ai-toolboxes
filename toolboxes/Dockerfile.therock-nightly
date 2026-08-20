@@ -6,6 +6,11 @@ RUN dnf -y --nodocs --setopt=install_weak_deps=False install \
   radeontop git vim curl ninja-build tar xz aria2 \
   && dnf clean all && rm -rf /var/cache/dnf/*
 
+COPY fetch-amdgpu-top-rpm.sh /tmp/fetch-amdgpu-top-rpm
+RUN chmod 0755 /tmp/fetch-amdgpu-top-rpm \
+  && /tmp/fetch-amdgpu-top-rpm /tmp/amdgpu_top.rpm \
+  && rm -f /tmp/fetch-amdgpu-top-rpm
+
 # Fetch the latest TheRock multi-arch Linux nightly for RDNA 4 (gfx1200/gfx1201).
 WORKDIR /tmp
 ARG GFX=gfx120X-all
@@ -82,9 +87,12 @@ RUN find /opt/rocm -type f -name '*.a' -delete \
 # runtime stage
 FROM registry.fedoraproject.org/fedora-minimal:43
 
+COPY --from=builder /tmp/amdgpu_top.rpm /tmp/amdgpu_top.rpm
+
 RUN microdnf -y --nodocs --setopt=install_weak_deps=0 install \
   bash ca-certificates libatomic libstdc++ libgcc radeontop vim procps-ng \
-  && microdnf clean all && rm -rf /var/cache/dnf/*
+  /tmp/amdgpu_top.rpm \
+  && microdnf clean all && rm -rf /var/cache/dnf/* /tmp/amdgpu_top.rpm
 
 COPY --from=builder /opt/rocm /opt/rocm
 COPY --from=builder /usr/local/ /usr/local/
