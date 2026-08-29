@@ -6,7 +6,8 @@ set -e
 declare -A TOOLBOXES
 
 TOOLBOXES["r9700-llama-vulkan-radv"]="docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv --device /dev/dri --group-add video --security-opt seccomp=unconfined"
-TOOLBOXES["r9700-llama-rocm-7.14"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.14 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
+TOOLBOXES["r9700-llama-vulkan-rocmfpx"]="docker.io/kyuz0/amd-r9700-toolboxes:vulkan-rocmfpx --device /dev/dri --group-add video --security-opt seccomp=unconfined"
+TOOLBOXES["r9700-llama-rocm-10.0"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-10.0 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 TOOLBOXES["r9700-llama-therock-nightly"]="docker.io/kyuz0/amd-r9700-toolboxes:therock-nightly --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 
 function usage() {

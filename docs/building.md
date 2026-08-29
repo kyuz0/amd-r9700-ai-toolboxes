@@ -27,11 +27,18 @@ cd toolboxes
 podman build --no-cache -t llama-vulkan-radv -f Dockerfile.vulkan-radv .
 ```
 
-**Example: Build the ROCm 7.14 toolbox image**
+**Example: Build the ROCm 10.0 toolbox image**
 
 ```sh
 cd toolboxes
-podman build --no-cache -t llama-rocm-7.14 -f Dockerfile.rocm-7.14 .
+podman build --no-cache -t llama-rocm-10.0 -f Dockerfile.rocm-10.0 .
+```
+
+**Example: Build the Vulkan ROCmFPX toolbox image**
+
+```sh
+cd toolboxes
+podman build --no-cache -t llama-vulkan-rocmfpx -f Dockerfile.vulkan-rocmfpx .
 ```
 
 > You can use `docker build` if you prefer Docker.
@@ -71,4 +78,3 @@ Replace the backend/image name and device/group options as needed (see main READ
 * [Fedora Toolbox Documentation](https://docs.fedoraproject.org/en-US/fedora-silverblue/toolbox/)
 * [Podman Build Reference](https://docs.podman.io/en/latest/markdown/podman-build.1.html)
 * [Docker Build Reference](https://docs.docker.com/engine/reference/commandline/build/)
-

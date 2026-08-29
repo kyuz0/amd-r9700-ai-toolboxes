@@ -26,9 +26,10 @@ done
 echo
 
 declare -A CMDS=(
-  [rocm7_14]="toolbox run -c r9700-llama-rocm-7.14 -- /usr/local/bin/llama-bench"
+  [rocm10_0]="toolbox run -c r9700-llama-rocm-10.0 -- /usr/local/bin/llama-bench"
   [therock_nightly]="toolbox run -c r9700-llama-therock-nightly -- /usr/local/bin/llama-bench"
   [vulkan_radv]="toolbox run -c r9700-llama-vulkan-radv -- /usr/sbin/llama-bench"
+  [vulkan_rocmfpx]="toolbox run -c r9700-llama-vulkan-rocmfpx -- /usr/sbin/llama-bench"
 )
 
 for MODEL_PATH in "${MODEL_PATHS[@]}"; do

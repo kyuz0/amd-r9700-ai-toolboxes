@@ -29,8 +29,8 @@ from urllib.error import URLError
 # ── Toolbox definitions ──────────────────────────────────────────────────────
 
 TOOLBOXES = {
-    "rocm-7.14": {
-        "image": "docker.io/kyuz0/amd-r9700-toolboxes:rocm-7.14",
+    "rocm-10.0": {
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:rocm-10.0",
         "engine_args": [
             "--device", "/dev/dri",
             "--device", "/dev/kfd",
@@ -51,6 +51,14 @@ TOOLBOXES = {
     },
     "vulkan-radv": {
         "image": "docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv",
+        "engine_args": [
+            "--device", "/dev/dri",
+            "--group-add", "video",
+            "--security-opt", "seccomp=unconfined",
+        ],
+    },
+    "vulkan-rocmfpx": {
+        "image": "docker.io/kyuz0/amd-r9700-toolboxes:vulkan-rocmfpx",
         "engine_args": [
             "--device", "/dev/dri",
             "--group-add", "video",
