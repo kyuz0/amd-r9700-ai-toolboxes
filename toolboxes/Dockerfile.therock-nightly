@@ -62,6 +62,7 @@ RUN git clone -b ${BRANCH} --single-branch --recursive ${REPO} . \
 
 # build
 RUN cmake -S . -B build \
+  -DGGML_NATIVE=OFF \
   -DGGML_HIP=ON \
   -DAMDGPU_TARGETS=gfx1201 \
   -DCMAKE_BUILD_TYPE=Release \

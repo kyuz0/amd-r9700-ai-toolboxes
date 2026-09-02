@@ -40,6 +40,7 @@ RUN git clean -xdf \
   && git submodule update --recursive \
   && patch -p1 < /tmp/llama-grammar.patch \
   && cmake -S . -B build \
+  -DGGML_NATIVE=OFF \
   -DGGML_HIP=ON \
   -DAMDGPU_TARGETS=gfx1201 \
   -DCMAKE_BUILD_TYPE=Release \

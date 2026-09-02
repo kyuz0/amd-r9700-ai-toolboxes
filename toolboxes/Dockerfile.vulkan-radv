@@ -17,6 +17,7 @@ RUN git clone --recursive https://github.com/ggerganov/llama.cpp.git .
 RUN git clean -xdf \
  && git submodule update --recursive \
  && cmake -S . -B build -G Ninja \
+      -DGGML_NATIVE=OFF \
       -DGGML_VULKAN=ON \
       -DCMAKE_BUILD_TYPE=Release \
       -DGGML_RPC=ON \

@@ -25,6 +25,7 @@ RUN git clean -xdf \
   && patch -p1 < /tmp/llama-grammar.patch \
   && patch -p1 < /tmp/rocmfpx-vulkan-shader-concurrency.patch \
   && cmake -S . -B build -G Ninja \
+  -DGGML_NATIVE=OFF \
   -DGGML_VULKAN=ON \
   -DGGML_HIP=OFF \
   -DGGML_CUDA=OFF \
