@@ -1,12 +1,36 @@
 # AMD R9700 Llama.cpp Toolboxes
 
-This project provides pre-built containers (“toolboxes”) for running LLMs on **AMD Radeon AI PRO R9700** GPUs (gfx1201). It uses `toolbox` (standard on Fedora, available on Ubuntu, Arch, etc.) to run `llama.cpp` with full GPU acceleration (Vulkan or ROCm) without messing up your host system.
+Pre-built `llama.cpp` containers for running LLMs with Vulkan or ROCm acceleration on **AMD Radeon AI PRO R9700** GPUs (`gfx1201`).
+
+## Recommended setup: AI Toolbox Cockpit
+
+[AI Toolbox Cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) is the preferred way to install, launch, and update these toolboxes. It provides tested, pre-configured profiles; supports Toolbx and Distrobox; and can run supported servers directly with Podman or Docker, so Toolbx is not required.
+
+```bash
+pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
+ai-toolbox-cockpit
+```
+
+The repository's [`refresh-toolboxes.sh`](refresh-toolboxes.sh) remains available for manual Toolbx refreshes. The Cockpit is recommended for normal installation and updates.
+
+## Available toolboxes
+
+Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolboxes/tags). The standard images are automatically rebuilt on `llama.cpp` updates, while the ROCmFPX image is rebuilt when its fork updates.
+
+| Tag | Backend | Notes |
+| :--- | :--- | :--- |
+| `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and models. |
+| `vulkan-rocmfpx` | Vulkan (ROCmFPX, Fedora 43) | Vulkan-only `charlie12345/ROCmFPX` build with ROCmFP3/FP4/FP6/FP8 weight formats. No ROCm runtime dependency. |
+| `rocm-10.0` | ROCm 10.0 Core SDK (Fedora 44) | Stable ROCm Core SDK build using AMD's supported `gfx1201` package set. |
+| `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-architecture `gfx120X-all` nightly for RDNA 4 (`gfx1200`/`gfx1201`). |
 
 ## Watch the YouTube Video
 
 [![Watch the YouTube Video](https://img.youtube.com/vi/dgyqBUD71lg/maxresdefault.jpg)](https://youtu.be/dgyqBUD71lg) 
 
-## 🚀 Quick Start
+## Manual setup and usage
+
+Use this section only if you prefer to create and maintain the container yourself. For the guided, tested path across Toolbx, Distrobox, Podman, and Docker, use [AI Toolbox Cockpit](#recommended-setup-ai-toolbox-cockpit).
 
 ### 1. Create a Toolbox
 **Which backend to choose?**
@@ -111,7 +135,7 @@ distrobox enter r9700-llama-rocm-10.0
 ```
 
 #### Updating Toolboxes
-To pull the latest images and recreate your toolboxes (useful when Llama.cpp updates):
+AI Toolbox Cockpit is the recommended update path. If you created Toolbx containers manually, the repository script can pull the latest images and recreate them:
 ```bash
 # Refresh all toolboxes
 ./refresh-toolboxes.sh all
@@ -127,16 +151,6 @@ To pull the latest images and recreate your toolboxes (useful when Llama.cpp upd
     *   **RADV (Mesa)**: Best compatibility.
     *   **ROCmFPX**: Custom Vulkan build for ROCmFP3/FP4/FP6/FP8 model formats.
 *   **ROCm**: AMD's compute stack, available as the stable ROCm 10.0 Core SDK and the latest TheRock nightly.
-
-### Supported Container Images
-Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolboxes/tags). The standard images are automatically rebuilt on llama.cpp updates, while the ROCmFPX image is rebuilt when its fork updates.
-
-| Tag | Backend | Notes |
-| :--- | :--- | :--- |
-| `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and all models. |
-| `vulkan-rocmfpx` | Vulkan (ROCmFPX, Fedora 43) | Vulkan-only `charlie12345/ROCmFPX` build with ROCmFP3/FP4/FP6/FP8 weight formats. No ROCm runtime dependency. |
-| `rocm-10.0` | ROCm 10.0 Core SDK (Fedora 44) | Stable ROCm Core SDK build using AMD's supported `gfx1201` package set. |
-| `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-arch `gfx120X-all` nightly tarball for RDNA 4 (`gfx1200`/`gfx1201`). |
 
 ## ⚡ Performance & Planning
 
