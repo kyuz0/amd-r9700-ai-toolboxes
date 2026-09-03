@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       backends:
-        description: Comma-separated backends to prune (rocm-10.0, therock-nightly, vulkan-radv, vulkan-rocmfpx) or "all"
+        description: Comma-separated backends to prune (rocm-10.0, therock-nightly, vulkan-radv, vulkan-rocmfpx, r9v-qwen38-rocm-10.0) or "all"
         default: all
       keep:
         description: Number of latest tags to keep
@@ -44,7 +44,7 @@ jobs:
         run: |
           IN='${{ github.event.inputs.backends }}'
           if [[ "$IN" == "all" || -z "$IN" ]]; then
-            JSON='["rocm-10.0","therock-nightly","vulkan-radv","vulkan-rocmfpx"]'
+            JSON='["rocm-10.0","therock-nightly","vulkan-radv","vulkan-rocmfpx","r9v-qwen38-rocm-10.0"]'
           else
             IN_CLEAN=$(echo "$IN" | tr -d '[:space:]')
             JSON='["'${IN_CLEAN//,/\",\"}'"]'
