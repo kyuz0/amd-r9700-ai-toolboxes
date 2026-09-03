@@ -1,18 +1,12 @@
 name: Build & Publish AMD R9700 Toolboxes
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - toolboxes/r9v-qwen38-rocm-10.0/**
-      - .github/workflows/build_and_publish.yml
   workflow_dispatch:
     inputs:
       backends:
         description: >
-          Comma-separated backends to build (rocm-10.0, therock-nightly, vulkan-radv, vulkan-rocmfpx, r9v-qwen38-rocm-10.0).
-          Use "all" to build the standard llama.cpp set; model-specific and ROCmFPX images are built explicitly.
+          Comma-separated backends to build (rocm-10.0, therock-nightly, vulkan-radv, vulkan-rocmfpx).
+          Use "all" to build the standard llama.cpp set; ROCmFPX is built by its own poller.
         required: false
         default: all
 
@@ -33,9 +27,7 @@ jobs:
           # Input from the Run workflow form
           IN='${{ inputs.backends }}'
 
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            JSON='["r9v-qwen38-rocm-10.0"]'
-          elif [[ "$IN" == "all" || -z "$IN" ]]; then
+          if [[ "$IN" == "all" || -z "$IN" ]]; then
             JSON='["rocm-10.0","therock-nightly","vulkan-radv"]'
           else
             # Remove spaces and build JSON array from comma list
@@ -50,7 +42,6 @@ jobs:
   build-and-push:
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
@@ -70,10 +61,10 @@ jobs:
           echo "After cleanup:" && df -h /
 
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -88,34 +79,19 @@ jobs:
           set -euo pipefail
           B="${{ matrix.backend }}"
           DF="Dockerfile.$B"
-          CONTEXT="."
-          if [[ -f "$B/Dockerfile" ]]; then
-            DF="$B/Dockerfile"
-            CONTEXT="$B"
-          fi
           NAME="${B}"
           LI="${LOCAL_PREFIX}-${NAME}"
           TAG="${NAME}_${BUILD_TS}"
           IMM="${DOCKERHUB_REPO}:${TAG}"
           CHN="${DOCKERHUB_REPO}:${NAME}"
-          BUILD_ARGS=()
-          if [[ "$B" == "r9v-qwen38-rocm-10.0" ]]; then
-            BUILD_ARGS+=(--build-arg MAX_JOBS=4)
-          fi
 
           echo "→ Building ${DF}"
-          docker build --no-cache "${BUILD_ARGS[@]}" -t "${LI}" -f "${DF}" "${CONTEXT}"
+          docker build --no-cache -t "${LI}" -f "${DF}" .
 
           echo "→ Running smoke test..."
-          if [[ "$B" == "r9v-qwen38-rocm-10.0" ]]; then
-            docker run --rm "${LI}" bash -lc "dpkg-query -W -f='\${Version}\\n' amdrocm-base10.0 | grep -Eq '^10\\.0\\.0-'"
-            docker run --rm "${LI}" python -c 'import importlib.metadata as m, torch; assert torch.version.hip.startswith("7.15"); print("torch", torch.__version__, "hip", torch.version.hip, "vllm", m.version("vllm"), "plugin", m.version("vllm-gguf-plugin"))'
-            docker run --rm "${LI}" vllm --help
-          else
-            docker run --rm "${LI}" bash -c "if command -v llama >/dev/null; then llama version; else llama-cli --version; fi"
-            docker run --rm "${LI}" llama-cli --help || { status=$?; echo "llama-cli exited with status $status"; [[ $status -eq 0 || $status -eq 1 || $status -eq 134 ]]; }
-            docker run --rm "${LI}" llama-server --help || { status=$?; echo "llama-server exited with status $status"; [[ $status -eq 0 || $status -eq 1 || $status -eq 134 ]]; }
-          fi
+          docker run --rm "${LI}" bash -c "if command -v llama >/dev/null; then llama version; else llama-cli --version; fi"
+          docker run --rm "${LI}" llama-cli --help || { status=$?; echo "llama-cli exited with status $status"; [[ $status -eq 0 || $status -eq 1 || $status -eq 134 ]]; }
+          docker run --rm "${LI}" llama-server --help || { status=$?; echo "llama-server exited with status $status"; [[ $status -eq 0 || $status -eq 1 || $status -eq 134 ]]; }
 
           echo "→ Tag & push immutable → ${IMM}"
           docker tag "${LI}" "${IMM}"

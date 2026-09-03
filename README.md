@@ -23,7 +23,6 @@ Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolb
 | `vulkan-rocmfpx` | Vulkan (ROCmFPX, Fedora 43) | Vulkan-only `charlie12345/ROCmFPX` build with ROCmFP3/FP4/FP6/FP8 weight formats. No ROCm runtime dependency. |
 | `rocm-10.0` | ROCm 10.0 Core SDK (Fedora 44) | Stable ROCm Core SDK build using AMD's supported `gfx1201` package set. |
 | `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-architecture `gfx120X-all` nightly for RDNA 4 (`gfx1200`/`gfx1201`). |
-| `r9v-qwen38-rocm-10.0` | R9V + ROCm 10.0 (Ubuntu 24.04) | Model-specific dual-R9700 runtime for Qwen3.8 Flash Next UD-IQ4_XS, vision, MTP2, and 128K context. |
 
 ## Watch the YouTube Video
 
@@ -62,21 +61,6 @@ toolbox create r9700-llama-vulkan-rocmfpx \
   -- --device /dev/dri --group-add video --security-opt seccomp=unconfined
 ```
 
-**Option D: R9V Qwen3.8 Flash Next on ROCm 10.0 (two R9700s)**
-```bash
-toolbox create r9700-r9v-qwen38-rocm-10.0 \
-  --image docker.io/kyuz0/amd-r9700-toolboxes:r9v-qwen38-rocm-10.0 \
-  -- --device /dev/dri --device /dev/kfd \
-  --group-add video --group-add render --group-add sudo \
-  --ipc host --security-opt seccomp=unconfined
-```
-
-This image is not a general vLLM toolbox. It pins R9V's Qwen3.8 source graph
-and launch profile, ported from its upstream ROCm 7.14 build to ROCm 10.0.
-The separately licensed model is not included. See
-[the R9V Qwen3.8 guide](docs/r9v-qwen38.md) for the exact download, PLE
-preparation, launch, and health-test sequence.
-
 > **Ubuntu Users**: `toolbox` may have issues with GPU access. Use [Distrobox](https://github.com/89luca89/distrobox) instead. See [Detailed Guide](#ubuntu-users-distrobox) below.
 
 ### 2. Enter the Toolbox
@@ -84,7 +68,6 @@ preparation, launch, and health-test sequence.
 toolbox enter r9700-llama-vulkan-radv
 # or: toolbox enter r9700-llama-rocm-10.0
 # or: toolbox enter r9700-llama-vulkan-rocmfpx
-# or: toolbox enter r9700-r9v-qwen38-rocm-10.0
 ```
 
 ### 3. Download a Model

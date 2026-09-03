@@ -9,7 +9,6 @@ TOOLBOXES["r9700-llama-vulkan-radv"]="docker.io/kyuz0/amd-r9700-toolboxes:vulkan
 TOOLBOXES["r9700-llama-vulkan-rocmfpx"]="docker.io/kyuz0/amd-r9700-toolboxes:vulkan-rocmfpx --device /dev/dri --group-add video --security-opt seccomp=unconfined"
 TOOLBOXES["r9700-llama-rocm-10.0"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-10.0 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
 TOOLBOXES["r9700-llama-therock-nightly"]="docker.io/kyuz0/amd-r9700-toolboxes:therock-nightly --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"
-TOOLBOXES["r9700-r9v-qwen38-rocm-10.0"]="docker.io/kyuz0/amd-r9700-toolboxes:r9v-qwen38-rocm-10.0 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --ipc host --security-opt seccomp=unconfined"
 
 function usage() {
   echo "Usage: $0 [all|toolbox-name1 toolbox-name2 ...]"
