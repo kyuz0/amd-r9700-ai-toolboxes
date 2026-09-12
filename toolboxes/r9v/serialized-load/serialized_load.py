@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Experimental startup-only lock; does not change weights or inference."""
+"""Startup lock preventing overlapping temporary expert buffers on 64 GB hosts.
+
+The installer wraps target weight loading and hot-expert compaction only.
+Weights and inference kernels are unchanged; inference still uses both GPUs.
+See README.md in this patch directory for rationale, scope and lock controls.
+"""
 from contextlib import contextmanager
 import fcntl
 import json

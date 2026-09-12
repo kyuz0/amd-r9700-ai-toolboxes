@@ -137,7 +137,8 @@ Main settings:
 | Graph sizes / tools | `[1,3]` / `qwen3_coder`, automatic tool choice |
 
 The offload number is logical weight accounting, not physical RAM allocation.
-Required fixes included serialized expert loading to fit 64 GB RAM, library
+Required fixes included [serialized expert loading](../toolboxes/r9v/serialized-load/README.md)
+to fit 64 GB RAM, library
 paths for Torch's SHM executable, and removal of Ubuntu's default UID-1000 user
 so Toolbx can create the host user. ROCm 10, Torch, Triton and native kernels
 are built as one pinned stack.

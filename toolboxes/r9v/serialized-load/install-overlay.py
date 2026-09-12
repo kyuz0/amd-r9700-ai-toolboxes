@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Install only the reviewed startup lock over the exact pinned plugin loader."""
+"""Patch the pinned GGUF loader to fit target expert loading in 64 GB host RAM.
+
+Two workers otherwise overlap approximately 27.7 GiB temporary expert buffers.
+Wrap only target loading and hot-expert compaction; see README.md beside this
+file for measured motivation, collective boundaries, controls and review steps.
+This project-specific patch is applied inside the image at build time.
+"""
 import difflib
 import hashlib
 import json
@@ -13,6 +19,8 @@ HERE = Path(__file__).resolve().parent
 
 
 def transform(source):
+    # The pinned block was audited to contain no inter-worker collectives.
+    # Keep generic postprocessing outside: widening the lock needs a new audit.
     import_site = "from .gguf_files import GGUFModelFiles\n"
     start = "            model.load_weights(\n"
     end = "            process_weights_after_loading(model, model_config, target_device)\n"
