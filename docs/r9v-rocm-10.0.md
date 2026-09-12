@@ -15,7 +15,7 @@ gh workflow run build-r9v.yml --ref main
 ```
 
 Uses the repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`.
-Builds from source, runs CPU dependency/SHM checks, then pushes:
+Builds from source, runs CPU dependency/SHM/AMD SMI identity checks, then pushes:
 
 - `docker.io/kyuz0/amd-r9700-toolboxes:r9v-rocm-10.0`
 - A versioned tag containing the timestamp, commit, run ID and attempt.
@@ -142,6 +142,12 @@ to fit 64 GB RAM, library
 paths for Torch's SHM executable, and removal of Ubuntu's default UID-1000 user
 so Toolbx can create the host user. ROCm 10, Torch, Triton and native kernels
 are built as one pinned stack.
+
+The image also links AMD SMI's development-library aliases to its runtime copy.
+The first Docker Hub build contained two independent copies, causing
+`Failed to infer device type` after Torch imported. CI now checks that Torch and
+Python AMD SMI load the same library. Rebuild the manual workflow and pull the
+updated image if you have that first build; model files do not need changing.
 
 Measured after sustained use, with 256 output tokens, thinking off and one request
 at a time:

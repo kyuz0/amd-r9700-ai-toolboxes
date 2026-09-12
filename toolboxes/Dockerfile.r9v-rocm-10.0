@@ -131,6 +131,19 @@ ENTRYPOINT ["vllm", "serve"]
 FROM ${R9V_RUNTIME_IMAGE} AS toolbox
 USER root
 ENV LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib/host-math/lib:/opt/rocm/lib/rocm_sysdeps/lib:/opt/r9v/lib/python3.12/site-packages/_rocm_sdk_libraries/lib
+# SDK core/devel can become separate copies after Docker layer export. Torch
+# loads core's SONAME, while Python amdsmi opens devel's unversioned library.
+# Two AMD SMI instances make GPU discovery return zero after importing Torch.
+# Explicit symlinks survive image transport; SDK hardlinks did not in CI.
+RUN for name in libamd_smi.so libamd_smi.so.27 libamd_smi.so.27.0.0; do \
+      cmp /opt/r9v/lib/python3.12/site-packages/_rocm_sdk_devel/lib/"$name" \
+          /opt/r9v/lib/python3.12/site-packages/_rocm_sdk_core/lib/libamd_smi.so.27 \
+      && ln -sfn ../../_rocm_sdk_core/lib/libamd_smi.so.27 \
+          /opt/r9v/lib/python3.12/site-packages/_rocm_sdk_devel/lib/"$name" \
+      || exit 1; \
+    done
+COPY r9v/device-discovery-probe.py /opt/r9v-device-discovery-probe.py
+RUN python /opt/r9v-device-discovery-probe.py
 RUN python -c 'import torch,importlib.metadata as m; assert torch.__version__ == "2.11.0+rocm10.0.0"; assert m.version("triton") == "3.8.0+git4cff872c.rocm10.0.0"'
 RUN apt-get update && apt-get install -y --no-install-recommends \
       sudo passwd util-linux libcap2-bin locales less iproute2 iputils-ping \

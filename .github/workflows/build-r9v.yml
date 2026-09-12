@@ -50,6 +50,8 @@ jobs:
           set -euo pipefail
           docker run --rm --network=none r9v-build python -m pip check
           docker run --rm --network=none r9v-build \
+            python /opt/r9v-device-discovery-probe.py
+          docker run --rm --network=none r9v-build \
             bash -n /usr/local/bin/r9v-serve /usr/local/bin/r9v-model
           docker run --rm --network=none r9v-build r9v-model help
           docker run --rm --network=none r9v-build \
