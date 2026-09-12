@@ -1,1 +1,11 @@
-__pycache__
+__pycache__/
+*.py[cod]
+
+# Local R9V research, experiments, model weights and runtime data.
+/research/
+/experiments/
+/qwen38-dual-r9700-research.md
+/r9v-data/
+/models/
+*.gguf
+*.safetensors

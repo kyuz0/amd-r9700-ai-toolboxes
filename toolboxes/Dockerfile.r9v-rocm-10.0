@@ -1,0 +1,168 @@
+# SPDX-License-Identifier: Apache-2.0
+# Build context: toolboxes/. Full source build by default; ROCm 10 only.
+# R9V_RUNTIME_IMAGE can reuse the recorded unpatched ROCm 10 runtime locally.
+ARG R9V_RUNTIME_IMAGE=r9v-runtime
+FROM docker.io/library/ubuntu:24.04@sha256:a61567bd31828687156d735ea8eb01ba4e37636e225dd6a48ba94136a70d9d61 AS sources
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git \
+    && rm -rf /var/lib/apt/lists/*
+RUN git clone --no-checkout https://github.com/Dyluhn/R9V.git /src/R9V \
+    && git -C /src/R9V checkout --detach 9fccc00120931e979197eace441a3a76b2ba5266 \
+    && git -C /src/R9V submodule update --init --recursive \
+    && test "$(git -C /src/R9V/vendor/vllm rev-parse HEAD)" = 4b20917386dcdfb619ee62ff24c45efeae176fdf \
+    && test "$(git -C /src/R9V/vendor/vllm-gguf-plugin rev-parse HEAD)" = 09b1199015c6b45de5c13dc4b36857ce27d9b0cd \
+    && test "$(git -C /src/R9V/kernels/r9v-gfx1201 rev-parse HEAD)" = 7905d9e0a3323411ef5d6dfb2f356061a9a491e3
+
+FROM docker.io/library/ubuntu:24.04@sha256:a61567bd31828687156d735ea8eb01ba4e37636e225dd6a48ba94136a70d9d61 AS sdk-probe
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      python3.12 python3.12-venv python3.12-dev python3-pip \
+      ca-certificates curl git patch build-essential pkg-config ccache \
+      libnuma-dev libdrm-dev libelf-dev libgomp1 libatomic1 libtinfo6 \
+      libibverbs-dev librdmacm-dev numactl pciutils procps \
+    && rm -rf /var/lib/apt/lists/*
+RUN python3.12 -m venv /opt/r9v
+ENV VIRTUAL_ENV=/opt/r9v PATH=/opt/r9v/bin:$PATH \
+    PIP_NO_CACHE_DIR=1 PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1
+COPY r9v/stack.constraints /opt/r9v-stack.constraints
+ENV PIP_CONSTRAINT=/opt/r9v-stack.constraints
+RUN python -m pip install --upgrade pip wheel 'setuptools>=77.0.3,<80.0.0' \
+      'setuptools-scm>=8' 'setuptools-rust>=1.9' 'cmake<4' ninja \
+      pybind11 numpy pyyaml packaging cffi requests \
+    && mkdir -p /opt/r9v-manifests
+
+# This is a fresh SDK 10 stack, not a 7.14 image with an overlaid HIP library.
+# AMD Torch 2.11 wheels require AMD Triton 3.8, which is intentionally changed.
+RUN python -m pip install \
+      --index-url https://stable.repo.amd.com/rocm/whl-next/ \
+      --extra-index-url https://pypi.org/simple \
+      --report /opt/r9v-manifests/amd-stack-install.json \
+      'torch[device-gfx1201]==2.11.0+rocm10.0.0' \
+      'torchvision[device-gfx1201]==0.26.0+rocm10.0.0' \
+      'rocm[libraries,devel,device-gfx1201]==10.0.0' \
+    && python -m pip check
+
+# rocm-sdk supplies the actual prefix. A stable image-local link lets upstream
+# extension build scripts keep ROCM_PATH=/opt/rocm without using host ROCm.
+RUN root="$(rocm-sdk path --root)" \
+    && test -d "$root" \
+    && ln -s "$root" /opt/rocm \
+    && python -m pip install --no-deps "$root/share/amd_smi"
+ENV ROCM_PATH=/opt/rocm HIP_PATH=/opt/rocm HIP_PLATFORM=amd \
+    PATH=/opt/r9v/bin:/opt/rocm/bin:/opt/rocm/lib/llvm/bin:$PATH \
+    ROCM_DEVEL_PATH=/opt/r9v/lib/python3.12/site-packages/_rocm_sdk_devel \
+    HIP_DEVICE_LIB_PATH=/opt/rocm/lib/llvm/amdgcn/bitcode \
+    CPLUS_INCLUDE_PATH=/opt/r9v/lib/python3.12/site-packages/_rocm_sdk_devel/include \
+    LIBRARY_PATH=/opt/r9v/lib/python3.12/site-packages/_rocm_sdk_devel/lib \
+    LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib/host-math/lib:/opt/rocm/lib/rocm_sysdeps/lib:/opt/r9v/lib/python3.12/site-packages/_rocm_sdk_libraries/lib \
+    PYTORCH_ROCM_ARCH=gfx1201 HIP_ARCHITECTURES=gfx1201 AMDGPU_TARGETS=gfx1201 \
+    GPU_ARCHS=gfx1201 VLLM_TARGET_DEVICE=rocm \
+    CC=/opt/rocm/lib/llvm/bin/amdclang CXX=/opt/rocm/lib/llvm/bin/amdclang++ \
+    MAX_JOBS=4 CMAKE_BUILD_PARALLEL_LEVEL=4
+COPY r9v/runtime-probe.py /opt/r9v-runtime-probe.py
+COPY r9v/shm-manager-probe.py /opt/r9v-shm-manager-probe.py
+COPY r9v/resolved-stack.json /opt/r9v-manifests/resolved-stack.json
+RUN python -c 'import torch,triton,importlib.metadata as m; assert torch.__version__ == "2.11.0+rocm10.0.0"; assert m.version("triton") == "3.8.0+git4cff872c.rocm10.0.0"; print(torch.__version__, torch.version.hip, triton.__version__, m.version("triton"))' \
+    && timeout --signal=TERM --kill-after=5s 40s python /opt/r9v-shm-manager-probe.py \
+    && python -m pip freeze > /opt/r9v-manifests/sdk-freeze.txt \
+    && dpkg-query -W > /opt/r9v-manifests/apt-packages.txt \
+    && hipcc --version \
+    && printf '#include <hip/hip_runtime.h>\nextern "C" __global__ void smoke() {}\n' \
+       | hipcc --offload-arch=gfx1201 -fPIC -shared -x hip - -o /tmp/hip-smoke.so \
+    && test -s /tmp/hip-smoke.so && rm /tmp/hip-smoke.so
+ENTRYPOINT ["python", "/opt/r9v-runtime-probe.py"]
+
+FROM sdk-probe AS r9v-runtime
+ARG MAX_JOBS=4
+ARG R9V_VLLM_VERSION=0.26.1rc0+r9v.g4b20917386dc
+ENV MAX_JOBS=${MAX_JOBS} CMAKE_BUILD_PARALLEL_LEVEL=${MAX_JOBS} \
+    AITER_USE_SYSTEM_TRITON=1 HSA_NO_SCRATCH_RECLAIM=1 \
+    SAFETENSORS_FAST_GPU=1 TOKENIZERS_PARALLELISM=false
+
+# Same AITER source as upstream v0.1.19, explicitly pinned and rebuilt for 10.
+RUN git clone --no-checkout https://github.com/ROCm/aiter.git /src/aiter \
+    && git -C /src/aiter checkout --detach 31350226161346314b3d8882c8085bd31dce6a34 \
+    && git -C /src/aiter submodule update --init --recursive \
+    && cd /src/aiter \
+    && GPU_ARCHS=gfx1201 PREBUILD_KERNELS=0 SETUPTOOLS_SCM_PRETEND_VERSION=0.1.19 \
+       python -m pip wheel --no-build-isolation --no-deps . -w /wheels \
+    && python -m pip install --no-deps /wheels/*aiter-*.whl 'flydsl==0.2.4' \
+    && git rev-parse HEAD > /opt/r9v-manifests/aiter-revision.txt
+
+COPY --from=sources /src/R9V/vendor/vllm/ /src/vllm/
+WORKDIR /src/vllm
+RUN test -n "$R9V_VLLM_VERSION" \
+    && python use_existing_torch.py \
+    && VLLM_TARGET_DEVICE=rocm \
+       SETUPTOOLS_SCM_PRETEND_VERSION="$R9V_VLLM_VERSION" \
+       VLLM_VERSION_OVERRIDE="$R9V_VLLM_VERSION" \
+       python -m pip wheel --no-build-isolation --no-deps . --wheel-dir /wheels \
+    && python -m pip install --report /opt/r9v-manifests/vllm-install.json \
+       /wheels/vllm-*.whl 'transformers==5.14.1' \
+    && python -m pip check
+
+COPY --from=sources /src/R9V/vendor/vllm-gguf-plugin/ /src/vllm-gguf-plugin/
+RUN python -m pip install --no-build-isolation /src/vllm-gguf-plugin
+COPY --from=sources /src/R9V/kernels/r9v-gfx1201/ /src/r9v-kernels/
+RUN VLLM_GGUF_PLUGIN_CSRC=/src/vllm-gguf-plugin/vllm_gguf_plugin/csrc \
+       QWEN38_DENSE_MMVQ_BUILD_DIR=/tmp/r9v-build/dense \
+       python /src/r9v-kernels/dense_mmvq_hip/build_extension.py \
+    && VLLM_GGUF_PLUGIN_CSRC=/src/vllm-gguf-plugin/vllm_gguf_plugin/csrc \
+       python /src/r9v-kernels/tiered_iq_moe_hip/build_extension.py \
+         --build-directory /tmp/r9v-build/tiered \
+         --variants auto,u2,u5,u10,reuse3,reuse3v2 \
+    && QWEN38_GDN_BUILD_DIR=/tmp/r9v-build/gdn \
+       python /src/r9v-kernels/fused_gdn_mtp_hip/build_extension.py \
+    && install -d /opt/r9v/kernels \
+    && install -m 0755 /tmp/r9v-build/dense/qwen38_dense_mmvq_hip.so /opt/r9v/kernels/ \
+    && install -m 0755 /tmp/r9v-build/tiered/qwen38_tiered_iq_moe_hip.so /opt/r9v/kernels/ \
+    && install -m 0755 /tmp/r9v-build/gdn/qwen38_fused_gdn_mtp_hip.so /opt/r9v/kernels/ \
+    && python -m pip check \
+    && python -m pip freeze > /opt/r9v-manifests/runtime-freeze.txt
+ENV QWEN38_DENSE_MMVQ_HIP_SO=/opt/r9v/kernels/qwen38_dense_mmvq_hip.so \
+    QWEN38_TIERED_IQ_MOE_HIP_SO=/opt/r9v/kernels/qwen38_tiered_iq_moe_hip.so \
+    QWEN38_FUSED_GDN_MTP_HIP_SO=/opt/r9v/kernels/qwen38_fused_gdn_mtp_hip.so \
+    RADIANCE_USE_R4D=0 RADIANCE_USE_R4D_AR=0 RADIANCE_USE_R4D_GDN=0 \
+    RADIANCE_USE_R4D_AR_QUANT=0
+WORKDIR /opt/r9v
+ENTRYPOINT ["vllm", "serve"]
+
+# Final toolbox includes the 64 GB startup fix and a shell-compatible default.
+FROM ${R9V_RUNTIME_IMAGE} AS toolbox
+USER root
+ENV LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib/host-math/lib:/opt/rocm/lib/rocm_sysdeps/lib:/opt/r9v/lib/python3.12/site-packages/_rocm_sdk_libraries/lib
+RUN python -c 'import torch,importlib.metadata as m; assert torch.__version__ == "2.11.0+rocm10.0.0"; assert m.version("triton") == "3.8.0+git4cff872c.rocm10.0.0"'
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      sudo passwd util-linux libcap2-bin locales less iproute2 iputils-ping \
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen en_US.UTF-8
+# Toolbx creates the host user at entry. Ubuntu's stock UID 1000 conflicts.
+RUN if getent passwd ubuntu >/dev/null; then userdel --remove ubuntu; fi
+COPY --from=sources /src/R9V/scripts/launch.sh /opt/r9v-src/scripts/launch.sh
+COPY --from=sources /src/R9V/profiles/ /opt/r9v-src/profiles/
+COPY --from=sources /src/R9V/packages/models/qwen38-flash-next/ /opt/r9v-src/packages/models/qwen38-flash-next/
+COPY --from=sources /src/R9V/tools/ /opt/r9v-src/tools/
+COPY r9v/serialized-load/ /tmp/r9v-serialized-load/
+RUN python /tmp/r9v-serialized-load/install-overlay.py && rm -rf /tmp/r9v-serialized-load
+COPY r9v/shm-manager-probe.py /opt/r9v-shm-manager-probe.py
+COPY r9v/make-serve.py /opt/r9v-manifests/make-serve.py
+COPY r9v/source-lock.json /opt/r9v-manifests/source-lock.json
+COPY r9v/plugin-info-logging.json /etc/r9v-plugin-logging.json
+COPY r9v/model.sh /usr/local/bin/r9v-model
+RUN python /opt/r9v-manifests/make-serve.py /opt/r9v-src /usr/local/bin/r9v-serve \
+    && chmod 0755 /usr/local/bin/r9v-serve /usr/local/bin/r9v-model \
+    && timeout --signal=TERM --kill-after=5s 40s python /opt/r9v-shm-manager-probe.py \
+    && python -m pip check \
+    && python -m pip freeze > /opt/r9v-manifests/toolbox-freeze.txt
+ENV R9V_SERIALIZE_EXPERT_LOAD=1 \
+    R9V_EXPERT_LOAD_LOCK_PATH=/cache/r9v-expert-load.lock \
+    VLLM_LOGGING_CONFIG_PATH=/etc/r9v-plugin-logging.json \
+    LANG=en_US.UTF-8
+LABEL com.github.containers.toolbox="true" \
+    org.opencontainers.image.title="R9V Qwen3.8 Flash Next — dual R9700, ROCm 10" \
+    org.opencontainers.image.source="https://github.com/kyuz0/amd-r9700-ai-toolboxes" \
+    org.opencontainers.image.description="Pinned R9V IQ4_XS / TP2 / MTP2 with serialized expert loading for 64 GB hosts"
+WORKDIR /root
+EXPOSE 8000
+ENTRYPOINT []
+CMD ["/bin/bash"]

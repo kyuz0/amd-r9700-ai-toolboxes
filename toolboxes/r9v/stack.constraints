@@ -1,0 +1,17 @@
+# AMD stable ROCm 10 wheel metadata verified 2026-09-12, Linux / Python 3.12.
+torch==2.11.0+rocm10.0.0
+amd-torch-device-gfx1201==2.11.0+rocm10.0.0
+amd-torch-device-gfx12-0==2.11.0+rocm10.0.0
+torchvision==0.26.0+rocm10.0.0
+amd-torchvision-device-gfx1201==0.26.0+rocm10.0.0
+triton==3.8.0+git4cff872c.rocm10.0.0
+rocm==10.0.0
+rocm-sdk-core==10.0.0
+rocm-sdk-libraries==10.0.0
+rocm-sdk-devel==10.0.0
+rocm-sdk-device-gfx1201==10.0.0
+rocm-bootstrap==0.1.0
+amd-aiter==0.1.19
+flydsl==0.2.4
+transformers==5.14.1
+setuptools>=77.0.3,<80.0.0

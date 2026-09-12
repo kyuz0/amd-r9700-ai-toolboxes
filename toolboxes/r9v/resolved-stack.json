@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "resolved_utc": "2026-09-12",
+  "python": "3.12",
+  "architecture": "gfx1201",
+  "base_image": "docker.io/library/ubuntu:24.04@sha256:a61567bd31828687156d735ea8eb01ba4e37636e225dd6a48ba94136a70d9d61",
+  "amd_index": "https://stable.repo.amd.com/rocm/whl-next/",
+  "versions": {
+    "torch": "2.11.0+rocm10.0.0",
+    "amd-torch-device-gfx1201": "2.11.0+rocm10.0.0",
+    "amd-torch-device-gfx12-0": "2.11.0+rocm10.0.0",
+    "torchvision": "0.26.0+rocm10.0.0",
+    "triton": "3.8.0+git4cff872c.rocm10.0.0",
+    "rocm": "10.0.0",
+    "rocm-sdk-core": "10.0.0",
+    "rocm-sdk-libraries": "10.0.0",
+    "rocm-sdk-devel": "10.0.0",
+    "rocm-sdk-device-gfx1201": "10.0.0",
+    "rocm-bootstrap": "0.1.0",
+    "amd-aiter": "0.1.19",
+    "flydsl": "0.2.4",
+    "transformers": "5.14.1"
+  },
+  "sources": {
+    "r9v": "9fccc00120931e979197eace441a3a76b2ba5266",
+    "vllm": "4b20917386dcdfb619ee62ff24c45efeae176fdf",
+    "gguf_plugin": "09b1199015c6b45de5c13dc4b36857ce27d9b0cd",
+    "r9v_kernels": "7905d9e0a3323411ef5d6dfb2f356061a9a491e3",
+    "aiter": "31350226161346314b3d8882c8085bd31dce6a34"
+  },
+  "purpose": "Pinned ROCm 10 build specification; installed versions are recorded by pip freeze in the image."
+}

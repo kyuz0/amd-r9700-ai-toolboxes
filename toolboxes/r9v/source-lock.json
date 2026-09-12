@@ -1,0 +1,12 @@
+{
+  "r9v": "9fccc00120931e979197eace441a3a76b2ba5266",
+  "vllm": "4b20917386dcdfb619ee62ff24c45efeae176fdf",
+  "gguf_plugin": "09b1199015c6b45de5c13dc4b36857ce27d9b0cd",
+  "kernels": "7905d9e0a3323411ef5d6dfb2f356061a9a491e3",
+  "model_repository": "Dyluhn/Qwen3.8-Flash-Next-R9V-IQ4_XS",
+  "model_revision": "bf836f0c20b6c92fcad4226ad3115eb8a19f7582",
+  "ple_bytes": 28800138240,
+  "ple_sha256": "dd55c28902f38cd88134b2a569c51282c5ffce30080487e1a645740115c56cc3",
+  "rocm": "10.0.0",
+  "aiter": "31350226161346314b3d8882c8085bd31dce6a34"
+}

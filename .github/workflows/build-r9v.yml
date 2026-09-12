@@ -1,0 +1,79 @@
+name: Build & Publish R9V (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-r9v-rocm-10
+  cancel-in-progress: false
+
+env:
+  IMAGE: docker.io/kyuz0/amd-r9700-toolboxes
+  CHANNEL: r9v-rocm-10.0
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android \
+            /usr/local/share/powershell /usr/share/swift /opt/ghc /opt/hostedtoolcache
+          docker system prune --all --force
+          docker builder prune --all --force
+          df -h /
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build ROCm 10 toolbox
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Serial compilation limits RAM use on the hosted runner; no GPU needed.
+          docker build --progress=plain --build-arg MAX_JOBS=1 \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --file toolboxes/Dockerfile.r9v-rocm-10.0 \
+            --tag r9v-build toolboxes
+
+      - name: Check image before publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network=none r9v-build python -m pip check
+          docker run --rm --network=none r9v-build \
+            bash -n /usr/local/bin/r9v-serve /usr/local/bin/r9v-model
+          docker run --rm --network=none r9v-build r9v-model help
+          docker run --rm --network=none r9v-build \
+            timeout --signal=TERM --kill-after=5s 40s python /opt/r9v-shm-manager-probe.py
+          docker image inspect r9v-build --format '{{.Id}}'
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push versioned and channel tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${CHANNEL}_$(date -u +%Y%m%dT%H%M%SZ)_${GITHUB_SHA:0:12}_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          docker tag r9v-build "$IMAGE:$version"
+          docker tag r9v-build "$IMAGE:$CHANNEL"
+          docker push "$IMAGE:$version"
+          docker push "$IMAGE:$CHANNEL"
+          {
+            echo 'Published R9V ROCm 10 toolbox:'
+            echo "- \`$IMAGE:$CHANNEL\`"
+            echo "- \`$IMAGE:$version\`"
+            echo "Source commit: \`$GITHUB_SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"

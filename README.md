@@ -1,6 +1,16 @@
-# AMD R9700 Llama.cpp Toolboxes
+# AMD R9700 AI Toolboxes
 
 Pre-built `llama.cpp` containers for running LLMs with Vulkan or ROCm acceleration on **AMD Radeon AI PRO R9700** GPUs (`gfx1201`).
+
+## Qwen3.8 Flash Next: R9V / ROCm 10
+
+[R9V toolbox build and run commands](docs/r9v-rocm-10.0.md) for **2× R9700 + 64 GB
+RAM**. A three-GPU host can use two selected GPUs with this profile. Measured
+**73–85 decode tok/s** after sustained use and **2,359 prefill tok/s at 8K**.
+
+Publish it using **Actions → Build & Publish R9V (manual) → Run workflow**.
+The workflow pushes `kyuz0/amd-r9700-toolboxes:r9v-rocm-10.0` to Docker Hub;
+it is independent of the automatic llama.cpp builds.
 
 ## Recommended setup: AI Toolbox Cockpit
 
