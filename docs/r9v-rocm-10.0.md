@@ -188,3 +188,50 @@ Tested **261888 input + 256 output = 262144 tokens**, without truncation:
 beginning, middle and end (144.33 s to first output). Short requests passed
 before and after. These are synthetic text checks, not the extended 128K
 stability test. 128K remains the default; 256K leaves less VRAM headroom.
+
+### Memory placement and matched performance
+
+Neither profile keeps all weights in GPU memory. Totals across both GPUs:
+
+| Allocation | 128K | 256K |
+|---|---:|---:|
+| Fixed expert weights in VRAM | 37.79 GiB | 37.79 GiB |
+| Cold expert weights in pinned host RAM | 17.65 GiB | 17.65 GiB |
+| Additional dynamic expert cache in VRAM | 0.87 GiB | Disabled |
+| Reserved KV cache in VRAM | 4.26 GiB | 7.75 GiB |
+
+Other weights and runtime buffers also occupy VRAM. Cold experts are accessed
+from pinned RAM over PCIe. The separate 26.82 GiB PLE table is SSD-backed in
+both profiles, with required pages read into RAM.
+
+The 128K context, expert offload, 16-slot cache and SSD PLE follow the
+[published R9V profile](https://github.com/Dyluhn/R9V/blob/9fccc00120931e979197eace441a3a76b2ba5266/profiles/qwen38-flash-next/dual-r9700/profile.env).
+Upstream qualified a 128 GB RAM host; this toolbox adapts startup for 64 GB RAM
+and uses ROCm 10 with synchronous scheduling. The 256K memory profile is an
+additional test here, not the upstream default.
+
+Matched tests on 2026-09-12 used identical prompts within each pair, 256 output
+tokens, temperature 0, thinking off, MTP2 and concurrency 1. Four fresh servers
+ran in 128K/256K/256K/128K order, each with the same 64K and eight short warmup
+requests. Every measured request had zero prefix-cache hits. Values below are
+medians of two runs per profile, using the same corrected ROCm 10 image:
+
+| Actual input tokens | Prefill, 128K / 256K (tok/s) | Decode, 128K / 256K (tok/s) |
+|---|---:|---:|
+| 8,192 | 2,361 / 2,168 | 75.8 / 48.2 |
+| 32,768 | 2,322 / 2,134 | 79.1 / 48.0 |
+| 65,536 | 2,236 / 2,058 | 78.3 / 49.9 |
+| 129,024 | 2,087 / 1,931 | 78.5 / 47.2 |
+
+Prefill is input tokens divided by time to first text; decode is output tokens
+after the first divided by the interval between first and last text chunks.
+Short prose/code/reasoning prompts also decoded more slowly: 77.8/85.4/77.7
+tok/s at 128K versus 46.2/52.6/48.5 at 256K. These results compare the complete
+memory profiles, including the expert-cache change. **128K remains the default
+because the tested 256K profile reduces throughput even below 130K input.**
+
+A separate control kept the original 128K context and KV allocation, changing
+only the expert cache from 16 slots to zero. The same code prompt fell from
+84.8 to 51.9 decode tok/s, versus 51.7 at 256K with zero slots; generated text
+and MTP acceptance were identical across all three. Removing the expert cache
+reproduced the slowdown without increasing the context limit.
