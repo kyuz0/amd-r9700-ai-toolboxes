@@ -165,3 +165,26 @@ is unresolved. An earlier 129,935-token request took 67.4 s to first text.
 A **30m44s mixed test passed 210 benchmark requests and 126 functional checks**,
 with no OOM events and at least 25.03 GiB available RAM. Vision recognized the
 test shapes but added Markdown fences, failing strict JSON parsing.
+
+## Optional 256K text context
+
+Set all three overrides in `toolbox.env`, keeping TP2, MTP2, one sequence and
+1024-token prefill batches:
+
+```bash
+R9V_MAX_MODEL_LEN=262144
+R9V_KV_CACHE_MEMORY_BYTES=4160749568
+R9V_TIERED_EXPERT_CACHE_SLOTS=0
+```
+
+For a direct `podman run`, pass each as `-e NAME=value`. In Cockpit, use
+**Apply 256K settings**. The dynamic expert cache is disabled to make room for
+3.875 GiB of KV cache per GPU. Simply doubling the 128K KV allocation with
+16 expert-cache slots failed with GPU-1 OOM.
+
+Tested **261888 input + 256 output = 262144 tokens**, without truncation:
+156.14 s to first output, 1677 input tok/s and 71.6 decode tok/s. A separate
+261888-token prompt correctly retrieved all three records placed near its
+beginning, middle and end (144.33 s to first output). Short requests passed
+before and after. These are synthetic text checks, not the extended 128K
+stability test. 128K remains the default; 256K leaves less VRAM headroom.
