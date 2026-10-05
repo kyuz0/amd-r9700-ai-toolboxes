@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "python": "3.12",
+  "architecture": "gfx1201",
+  "base_image": "docker.io/library/ubuntu:24.04",
+  "amd_index": "https://stable.repo.amd.com/rocm/whl-next/",
+  "versions": {
+    "torch": "2.11.0+rocm10.0.0",
+    "amd-torch-device-gfx1201": "2.11.0+rocm10.0.0",
+    "amd-torch-device-gfx12-0": "2.11.0+rocm10.0.0",
+    "torchvision": "0.26.0+rocm10.0.0",
+    "triton": "3.8.0+git4cff872c.rocm10.0.0",
+    "rocm": "10.0.0",
+    "rocm-sdk-core": "10.0.0",
+    "rocm-sdk-libraries": "10.0.0",
+    "rocm-sdk-devel": "10.0.0",
+    "rocm-sdk-device-gfx1201": "10.0.0",
+    "rocm-bootstrap": "0.1.0",
+    "amd-aiter": "0.1.19",
+    "flydsl": "0.2.4",
+    "transformers": "5.14.1"
+  },
+  "purpose": "Compatible ROCm 10 build constraints; actual sources and installed versions are recorded during each build."
+}
