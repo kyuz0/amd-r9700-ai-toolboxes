@@ -1,0 +1,40 @@
+{
+  "disable_existing_loggers": false,
+  "formatters": {
+    "vllm": {
+      "class": "vllm.logging_utils.NewLineFormatter",
+      "datefmt": "%m-%d %H:%M:%S",
+      "format": "%(levelname)s %(asctime)s [%(fileinfo)s:%(lineno)d] %(message)s"
+    },
+    "vllm_color": {
+      "class": "vllm.logging_utils.ColoredFormatter",
+      "datefmt": "%m-%d %H:%M:%S",
+      "format": "%(levelname)s %(asctime)s [%(fileinfo)s:%(lineno)d] %(message)s"
+    }
+  },
+  "handlers": {
+    "vllm": {
+      "class": "logging.StreamHandler",
+      "formatter": "vllm",
+      "level": "INFO",
+      "stream": "ext://sys.stdout"
+    }
+  },
+  "loggers": {
+    "vllm": {
+      "handlers": [
+        "vllm"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "vllm_gguf_plugin": {
+      "handlers": [
+        "vllm"
+      ],
+      "level": "INFO",
+      "propagate": false
+    }
+  },
+  "version": 1
+}

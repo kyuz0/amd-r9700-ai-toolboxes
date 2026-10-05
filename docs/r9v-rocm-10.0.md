@@ -1,5 +1,7 @@
 # Qwen3.8 Flash Next — R9V / ROCm 10
 
+For the source-pinned v0.4.4 local-build profile, use [its build and launch guide](r9v-v044-rocm-10.0.md). This page describes the separately published image and its profiles.
+
 Tested with **2× Radeon AI PRO R9700 32 GB, 64 GB host RAM and NVMe**.
 On a three-R9700 host, this profile uses two selected GPUs; three-way tensor
 parallelism is not supported by this packaged profile. Use rootless Podman/crun

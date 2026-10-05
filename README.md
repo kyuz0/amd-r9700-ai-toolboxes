@@ -2,6 +2,10 @@
 
 Pre-built `llama.cpp` containers for running LLMs with Vulkan or ROCm acceleration on **AMD Radeon AI PRO R9700** GPUs (`gfx1201`).
 
+## Current R9V toolbox
+
+[Install and launch the current R9V profile](docs/r9v-v044-rocm-10.0.md) for two R9700 cards, 64 GB host RAM, text/MTP-2 at 67,840 context and disk-backed PLE. The rolling `r9v-rocm-10.0-current` channel uses ROCm 10 and includes serialized expert loading.
+
 ## Qwen3.8 Flash Next: R9V / ROCm 10
 
 [R9V toolbox build and run commands](docs/r9v-rocm-10.0.md) for **2× R9700 + 64 GB

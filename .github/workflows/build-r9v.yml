@@ -12,12 +12,12 @@ concurrency:
 
 env:
   IMAGE: docker.io/kyuz0/amd-r9700-toolboxes
-  CHANNEL: r9v-rocm-10.0
+  CHANNEL: r9v-rocm-10.0-current
 
 jobs:
   build-and-push:
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 360
     steps:
       - name: Free runner disk space
         shell: bash
@@ -34,14 +34,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Resolve current stable R9V
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref=$(gh api repos/Dyluhn/R9V/releases/latest --jq .tag_name)
+          test -n "$ref"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
       - name: Build ROCm 10 toolbox
         shell: bash
         run: |
           set -euo pipefail
           # Serial compilation limits RAM use on the hosted runner; no GPU needed.
-          docker build --progress=plain --build-arg MAX_JOBS=1 \
+          docker build --pull --progress=plain --build-arg MAX_JOBS=1 --build-arg R9V_REF="${{ steps.source.outputs.ref }}" \
             --label "org.opencontainers.image.revision=$GITHUB_SHA" \
-            --file toolboxes/Dockerfile.r9v-rocm-10.0 \
+            --file toolboxes/Dockerfile.r9v-rocm-10.0-latest \
             --tag r9v-build toolboxes
 
       - name: Check image before publishing
@@ -57,6 +66,17 @@ jobs:
           docker run --rm --network=none r9v-build \
             timeout --signal=TERM --kill-after=5s 40s python /opt/r9v-shm-manager-probe.py
           docker image inspect r9v-build --format '{{.Id}}'
+
+      - name: Export actual build provenance
+        run: |
+          mkdir -p build-provenance
+          docker create --name r9v-receipt r9v-build
+          docker cp r9v-receipt:/opt/r9v-manifests/. build-provenance/
+          docker rm r9v-receipt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r9v-build-provenance
+          path: build-provenance/
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3

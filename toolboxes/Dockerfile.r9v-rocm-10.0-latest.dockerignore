@@ -1,0 +1,7 @@
+# This image only needs its Dockerfile and the R9V support files.
+**
+!Dockerfile.r9v-rocm-10.0-latest
+!r9v-v044/
+!r9v-v044/**
+**/__pycache__/
+**/*.pyc
