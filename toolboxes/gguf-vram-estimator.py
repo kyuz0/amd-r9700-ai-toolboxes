@@ -12,7 +12,17 @@ GGUF_MAGIC = 0x46554747
 GGUF_VALUE_TYPE = {
     0: "UINT8", 1: "INT8", 2: "UINT16", 3: "INT16", 4: "UINT32",
     5: "INT32", 6: "FLOAT32", 7: "BOOL", 8: "STRING", 9: "ARRAY",
+    10: "UINT64", 11: "INT64", 12: "FLOAT64",
 }
+SCALAR_FORMAT = {
+    0: "<B", 1: "<b", 2: "<H", 3: "<h", 4: "<I", 5: "<i",
+    6: "<f", 7: "<?", 10: "<Q", 11: "<q", 12: "<d",
+}
+ARCH_METADATA_SUFFIXES = (
+    ".block_count", ".context_length", ".attention.head_count_kv",
+    ".attention.key_length", ".attention.value_length",
+    ".attention.sliding_window_size",
+)
 
 class GGUFMetadataReader:
     """A minimal reader to get only the necessary KV metadata for cache calculation."""
@@ -36,42 +46,34 @@ class GGUFMetadataReader:
         value_type = GGUF_VALUE_TYPE.get(value_type_idx)
         if not value_type: raise ValueError(f"Unknown GGUF value type: {value_type_idx}")
         if value_type == "STRING": return self._read_string()
-        if value_type == "UINT32": return struct.unpack("<I", self.f.read(4))[0]
-        if value_type == "INT32": return struct.unpack("<i", self.f.read(4))[0]
+        scalar_format = SCALAR_FORMAT.get(value_type_idx)
+        if scalar_format:
+            return struct.unpack(scalar_format, self.f.read(struct.calcsize(scalar_format)))[0]
         self._skip_value(value_type_idx)
 
     def _skip_value(self, value_type_idx: int):
         value_type = GGUF_VALUE_TYPE.get(value_type_idx)
-        if not value_type: return
-        if value_type in ("UINT8", "INT8", "BOOL"): self.f.seek(1, 1)
-        elif value_type in ("UINT16", "INT16"): self.f.seek(2, 1)
-        elif value_type in ("UINT32", "INT32", "FLOAT32"): self.f.seek(4, 1)
+        if not value_type: raise ValueError(f"Unknown GGUF value type: {value_type_idx}")
+        scalar_format = SCALAR_FORMAT.get(value_type_idx)
+        if scalar_format:
+            self.f.seek(struct.calcsize(scalar_format), 1)
         elif value_type == "STRING":
             (length,) = struct.unpack("<Q", self.f.read(8))
             self.f.seek(length, 1)
         elif value_type == "ARRAY":
             (array_type_idx, count) = struct.unpack("<IQ", self.f.read(12))
-            type_map = {0:1, 1:1, 2:2, 3:2, 4:4, 5:4, 6:4, 7:1, 10:8, 11:8, 12:8}
-            element_size = type_map.get(array_type_idx)
-            if element_size: self.f.seek(count * element_size, 1)
+            scalar_format = SCALAR_FORMAT.get(array_type_idx)
+            if scalar_format:
+                self.f.seek(count * struct.calcsize(scalar_format), 1)
             else:
-                for _ in range(count): self._skip_value(8)
+                for _ in range(count): self._skip_value(array_type_idx)
 
     def _read_metadata(self, count: int):
-        keys_to_read = {"general.architecture", "general.name"}
-        arch_specific_keys_added = False
         for _ in range(count):
             key = self._read_string()
             (value_type_idx,) = struct.unpack("<I", self.f.read(4))
-            if not arch_specific_keys_added and "general.architecture" in self.metadata:
-                prefix = self.metadata["general.architecture"]
-                keys_to_read.update({
-                    f"{prefix}.block_count", f"{prefix}.context_length",
-                    f"{prefix}.attention.head_count_kv", f"{prefix}.attention.key_length",
-                    f"{prefix}.attention.value_length", f"{prefix}.attention.sliding_window_size"
-                })
-                arch_specific_keys_added = True
-            if key in keys_to_read:
+            # GGUF metadata is not required to put general.architecture first.
+            if key in ("general.architecture", "general.name") or key.endswith(ARCH_METADATA_SUFFIXES):
                 self.metadata[key] = self._read_value(value_type_idx)
             else:
                 self._skip_value(value_type_idx)
