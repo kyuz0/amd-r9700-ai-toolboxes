@@ -48,6 +48,18 @@ jobs:
           echo "tag=src-${revision:0:12}" >> "$GITHUB_OUTPUT"
           echo "revision=$revision" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
+      - name: Build and preserve compiled source cache
+        uses: docker/build-push-action@v6
+        with:
+          context: toolboxes
+          file: toolboxes/Dockerfile.radiance-rocm-10.1
+          target: builder
+          outputs: type=cacheonly
+          build-args: |
+            RADIANCE_REF=${{ steps.source.outputs.revision }}
+            JOBS=2
+          cache-from: type=gha,scope=radiance-stock-rocm101
+          cache-to: type=gha,mode=max,scope=radiance-stock-rocm101
       - name: Build and run required host checks
         uses: docker/build-push-action@v6
         with:
@@ -59,6 +71,7 @@ jobs:
             RADIANCE_REF=${{ steps.source.outputs.revision }}
             JOBS=2
             TEST_JOBS=2
+            TEST_CPU_BUDGET_SCALE=2
           cache-from: type=gha,scope=radiance-stock-rocm101
           cache-to: type=gha,mode=max,scope=radiance-stock-rocm101
       - name: Check native toolbox and capture provenance
