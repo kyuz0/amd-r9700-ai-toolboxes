@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       source_revision:
-        description: Exact standalone Radiance commit to build (qualify before changing the default)
+        description: Latest stable release, or an exact standalone Radiance commit
         required: true
-        default: 5a9ce4912bb4ae5315e4a177f9e7d5b10d035766
+        default: latest
 
 permissions:
   contents: read
@@ -33,19 +33,29 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Resolve pinned standalone Radiance source
+      - name: Resolve stable standalone Radiance source
         id: source
         shell: bash
         env:
           REVISION: ${{ inputs.source_revision }}
         run: |
           set -euo pipefail
-          [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]]
+          upstream=https://codeberg.org/StillDeadcode/radiance.git
+          if [[ "$REVISION" == latest ]]; then
+            git ls-remote --tags --refs "$upstream" > /tmp/radiance-tags.txt
+            release=$(awk '$2 ~ /^refs\/tags\/v[0-9]+\.[0-9]+\.[0-9]+$/ { sub(/^refs\/tags\//, "", $2); print $2 }' /tmp/radiance-tags.txt | sort -V | tail -n 1)
+            test -n "$release"
+            selector="refs/tags/$release"
+          else
+            [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]]
+            selector="$REVISION"
+            release="src-${REVISION:0:12}"
+          fi
           git init /tmp/radiance-source
-          git -C /tmp/radiance-source fetch --depth 1 https://codeberg.org/StillDeadcode/radiance.git "$REVISION"
+          git -C /tmp/radiance-source fetch --depth 1 "$upstream" "$selector"
           revision=$(git -C /tmp/radiance-source rev-parse 'FETCH_HEAD^{commit}')
-          test "$revision" = "$REVISION"
-          echo "tag=src-${revision:0:12}" >> "$GITHUB_OUTPUT"
+          if [[ "$REVISION" != latest ]]; then test "$revision" = "$REVISION"; fi
+          echo "tag=$release" >> "$GITHUB_OUTPUT"
           echo "revision=$revision" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - name: Build and preserve compiled source cache

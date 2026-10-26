@@ -66,7 +66,7 @@ The 47.68 GiB n-gram table lives in pinned host RAM. Allow about 54 GiB of avail
 
 ## Build and publish
 
-Run **Actions → Build & Publish Standalone Radiance** with the exact qualified source commit. The workflow builds the image, runs the host suite and no-device native smoke checks, uploads provenance, then publishes an immutable source/run tag and the rolling `radiance-rocm-10.1` channel. Compiler rebuilding is not part of this recipe; `RAD_HIP_VOPD_REPEATABLE=OFF` selects upstream's stock-toolchain build path.
+Run **Actions → Build & Publish Standalone Radiance**. The default resolves the latest stable release and records its exact commit. Enter an explicit full commit to reproduce the measured build. The workflow builds the image, runs the host suite and no-device native smoke checks, uploads provenance, then publishes an immutable source/run tag and the rolling `radiance-rocm-10.1` channel. Compiler rebuilding is not part of this recipe; `RAD_HIP_VOPD_REPEATABLE=OFF` selects upstream's stock-toolchain build path.
 
 The image records source revision, compiler version, build packages, licenses and the host-test completion marker under `/opt/radiance/share/doc/radiance/`. CI host tests do not replace model inference on the target GPUs.
 
