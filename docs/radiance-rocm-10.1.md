@@ -2,18 +2,18 @@
 
 The `radiance-rocm-10.1` toolbox builds [Standalone Radiance](https://codeberg.org/StillDeadcode/radiance) from source for `gfx1201`, using ROCm 10.1 and its supplied compiler. It includes the native architecture/kernel plugins, media libraries, conversion tools and source/license receipts. It is a separate engine from the older vLLM Radiance toolbox.
 
-The initial qualified source is v1.12.0, commit `5a9ce4912bb4ae5315e4a177f9e7d5b10d035766`. The build passed all 110 host tests. Qwen3.8-27B FP8 on two R9700s and MXFP4 on one R9700 passed sampled text, thinking, image input and tool calls. The FP8 target-only and DFlash2-7 profiles completed the nine-depth C1 HTTP workload through 64K history, with 2,048 new prompt tokens and 256 output tokens per measurement.
+The qualified source is v1.12.0, commit `5a9ce4912bb4ae5315e4a177f9e7d5b10d035766`. The source build passed all 110 host tests. Qwen3.8-27B FP8 on two R9700s, MXFP4 on one R9700 and Flash Next FP8/IQ4R on four R9700s passed sampled text, thinking, image input and tool calls. Target-only and bundled drafting profiles completed the nine-depth C1 HTTP workload through 64K history, with 2,048 new prompt tokens and 256 output tokens per measurement.
 
-| Profile | History | Prefill tokens/s | Decode tokens/s |
-| --- | ---: | ---: | ---: |
-| Target only | 0 | 5,233.6 | 41.05 |
-| Target only | 32,768 | 3,377.0 | 39.20 |
-| Target only | 65,536 | 2,854.3 | 37.06 |
-| DFlash2-7 | 0 | 1,702.3 | 96.08 |
-| DFlash2-7 | 32,768 | 2,923.0 | 82.84 |
-| DFlash2-7 | 65,536 | 279.2 | 124.29 |
+| Artifact | Mode | GPUs | PP at 0 | TG at 0 | PP at 64K | TG at 64K |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Qwen3.8-27B FP8 | Target only | 2 | 5,233.6 | 41.05 | 2,854.3 | 37.06 |
+| Qwen3.8-27B FP8 | DFlash2-7 | 2 | 1,702.3 | 96.08 | 279.2 | 124.29 |
+| Qwen3.8-27B MXFP4 | Target only | 1 | 1,908.4 | 38.50 | 667.4 | 31.82 |
+| Qwen3.8-27B MXFP4 | DFlash2-7 | 1 | 1,229.5 | 114.24 | 141.2 | 73.59 |
+| Flash Next FP8/IQ4R | Target only / RAM | 4 | 6,443.5 | 121.44 | 5,070.2 | 117.10 |
+| Flash Next FP8/IQ4R | MTP3 / RAM | 4 | 7,241.9 | 319.25 | 4,519.9 | 323.58 |
 
-These are two-repeat means on two R9700s in a four-card Threadripper 9970X / 64 GB host, using verified throughput-performance and automatic GPU fans. The workload is deterministic raw completion speed, separate from sampled chat or coding-agent scores.
+These are two-repeat mean rates in tokens/s on a four-card Threadripper 9970X / 64 GB host, using verified throughput-performance and automatic GPU fans under an explicit user-approved benchmark-policy exception. Each row uses only the listed GPUs. PP measures useful follow-up tokens through the first response token, including any reported history replay. The workload is deterministic raw completion speed, separate from sampled chat or coding-agent scores.
 
 ## Install
 
@@ -33,6 +33,7 @@ These containers include their tokenizer, vision and drafting tensors. A GGUF or
 | --- | --- | --- | ---: | --- |
 | Qwen3.8-27B FP8 | `StillDeadcode/qwen3.8-27b-fp8@edd43fda378af6b3b5e8981b6e936145be9608fd` | `qwen3.8-27b-fp8.rad` | 30,783,856,640 | TP2 |
 | Qwen3.8-27B MXFP4 | `StillDeadcode/qwen3.8-27b-mxfp4@60bd4139f335205fbc120e5534329c30b691af0e` | `qwen3.8-27b-mxfp4.rad` | 19,377,119,232 | TP1 |
+| Qwen3.8-Flash-Next FP8/IQ4R | `StillDeadcode/qwen3.8-next-flash-fp8-iq4r-moe@8267a67384583f6be309981baf878b09ff900a9a` | `qwen3.8-next-flash-fp8-iq4r-moe.rad` | 121,969,901,568 | TP4 |
 
 Use a pinned Hugging Face download or Cockpit's native model manager. The downloader's native transfer checks and exact file-size/revision coverage establish acquisition; inference qualification is separate.
 
@@ -57,8 +58,24 @@ For MXFP4, select its file and use `--tp 1`. The FP8 bundled DFlash2 profile use
 
 The API exposes `/health`, `/v1/models`, `/v1/chat/completions`, raw `/v1/completions`, `/tokenize` and `/metrics`. Qwen's sampled thinking profile uses temperature 1.0, top-p 0.95, top-k 20, min-p 0 and explicit thinking. The sampled non-thinking profile uses temperature 0.7, top-p 0.8, top-k 20, min-p 0 and presence penalty 1.5. Request settings override server defaults; select the thinking mode explicitly in clients.
 
+## Launch Flash Next
+
+Select its native file, use `--tp 4` and add `--ngram-placement ram` to the launch command above. Target-only decoding uses `--num-speculative-tokens 0`; the bundled MTP profile uses `--num-speculative-tokens 3`.
+
+The 47.68 GiB n-gram table lives in pinned host RAM. Allow about 54 GiB of available host memory at startup, including loading headroom. Main weights and experts use the four GPU pools; a small token-embedding pool also uses pinned host memory. `--placement all_vram` does not place the n-gram table in VRAM. Start with an 8,192-token context and one session. Complete C4/C8/C16 standard-depth curves used 16 server sequences. At 64K, MTP3 aggregate decode reached 477.78/186.26/41.61 tokens/s respectively, with increasing history replay at C8/C16. Prefer one or four active clients for deep-context work.
+
 ## Build and publish
 
 Run **Actions → Build & Publish Standalone Radiance** with the exact qualified source commit. The workflow builds the image, runs the host suite and no-device native smoke checks, uploads provenance, then publishes an immutable source/run tag and the rolling `radiance-rocm-10.1` channel. Compiler rebuilding is not part of this recipe; `RAD_HIP_VOPD_REPEATABLE=OFF` selects upstream's stock-toolchain build path.
 
 The image records source revision, compiler version, build packages, licenses and the host-test completion marker under `/opt/radiance/share/doc/radiance/`. CI host tests do not replace model inference on the target GPUs.
+
+## Frozen-continuation quality
+
+The frozen-continuation panels completed on the published image with target-only scoring. NLL is per local target token; lower is better. These are hosted-continuation checks, without an original-weight full-logit parity claim.
+
+| Native artifact | Short100 NLL | Long12 NLL | Local target tokens, short / long |
+| --- | ---: | ---: | ---: |
+| Qwen3.8-27B FP8 | 0.281940 | 0.099176 | 5,836 / 764 |
+| Qwen3.8-27B MXFP4 | 0.318670 | 0.147677 | 5,836 / 764 |
+| Flash Next FP8/IQ4R | 0.288974 | 0.130511 | 5,696 / 766 |
