@@ -5,6 +5,8 @@ set -e
 # List of all known toolboxes and their configurations
 declare -A TOOLBOXES
 
+TOOLBOXES["radiance-rocm-10.1"]="docker.io/kyuz0/amd-r9700-toolboxes:radiance-rocm-10.1 --device /dev/dri --device /dev/kfd --group-add video --group-add render --security-opt seccomp=unconfined"
+
 TOOLBOXES["r9700-llama-vulkan-radv"]="docker.io/kyuz0/amd-r9700-toolboxes:vulkan-radv --device /dev/dri --group-add video --security-opt seccomp=unconfined"
 TOOLBOXES["r9700-llama-vulkan-rocmfpx"]="docker.io/kyuz0/amd-r9700-toolboxes:vulkan-rocmfpx --device /dev/dri --group-add video --security-opt seccomp=unconfined"
 TOOLBOXES["r9700-llama-rocm-10.0"]="docker.io/kyuz0/amd-r9700-toolboxes:rocm-10.0 --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined"

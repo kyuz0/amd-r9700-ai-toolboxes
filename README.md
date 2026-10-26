@@ -1,6 +1,10 @@
 # AMD R9700 AI Toolboxes
 
-Pre-built `llama.cpp` containers for running LLMs with Vulkan or ROCm acceleration on **AMD Radeon AI PRO R9700** GPUs (`gfx1201`).
+Pre-built `llama.cpp` and standalone Radiance containers for running LLMs with Vulkan or ROCm acceleration on **AMD Radeon AI PRO R9700** GPUs (`gfx1201`).
+
+## Standalone Radiance
+
+[Native Radiance installation and Qwen profiles](docs/radiance-rocm-10.1.md) for R9700 cards. This source-built ROCm 10.1 toolbox uses the supplied compiler and native `.rad` models. The older vLLM Radiance toolbox is a separate legacy engine.
 
 ## Current R9V toolbox
 
@@ -35,6 +39,7 @@ Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolb
 | :--- | :--- | :--- |
 | `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and models. |
 | `vulkan-rocmfpx` | Vulkan (ROCmFPX, Fedora 43) | Vulkan-only `charlie12345/ROCmFPX` build with ROCmFP3/FP4/FP6/FP8 weight formats. No ROCm runtime dependency. |
+| `radiance-rocm-10.1` | Standalone Radiance / ROCm 10.1 | Native `.rad` Qwen models, image input and bundled draft heads. Manual source-pinned build. |
 | `rocm-10.0` | ROCm 10.0 Core SDK (Fedora 44) | Stable ROCm Core SDK build using AMD's supported `gfx1201` package set. |
 | `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-architecture `gfx120X-all` nightly for RDNA 4 (`gfx1200`/`gfx1201`). |
 
