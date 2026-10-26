@@ -1,0 +1,84 @@
+# Standalone Radiance. Uses the base image's compiler; never builds LLVM or vLLM.
+# FFmpeg stage adapted from StillDeadcode/radiance v1.12.0, Apache-2.0.
+ARG ROCM_VERSION=10.1.0-full
+ARG UBUNTU_VERSION=24.04
+ARG FFMPEG_VERSION=8.1.3
+ARG FFMPEG_SHA256=7138d28c96d9d3e3af4ee3d8cad72741f8ffb40da90c1112235dea3ecd3178a3
+
+# ----------------------------------------------------------------------------------------- ffmpeg
+FROM docker.io/library/ubuntu:${UBUNTU_VERSION} AS ffmpeg
+ARG FFMPEG_VERSION
+ARG FFMPEG_SHA256
+ARG JOBS=
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      build-essential nasm pkg-config ca-certificates curl xz-utils zlib1g-dev libdav1d-dev \
+      libwebp-dev libopenh264-dev \
+ && rm -rf /var/lib/apt/lists/*
+WORKDIR /tmp
+# Demuxers: media.cpp's kFormats whitelist. Decoders: what those containers carry -- still
+# images, H.264 and HEVC (MP4, MOV, HEIF), VP8 and VP9 (WebM, WebP), AV1 through dav1d (WebM, MP4,
+# AVIF), MPEG-1/2/4, Theora and the FLV/H.263 family. JPEG XL is recognised and refused by name
+# (its only decoder is libjxl's). Encoders: the image output formats of media.cpp encode_image
+# (png, jpeg as mjpeg, webp through libwebp), and a generated video's MP4 (core/mm/mp4.cpp): H.264
+# through libopenh264 (BSD-licensed, so the build stays LGPL) and FFmpeg's own AAC, in the mp4
+# muxer. No protocols: media.cpp and mp4.cpp read and write memory through their own I/O
+# contexts.
+RUN echo 1000 > /proc/self/oom_score_adj 2>/dev/null || true; \
+    curl -fsSL "https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz" -o ffmpeg.tar.xz \
+ && echo "${FFMPEG_SHA256}  ffmpeg.tar.xz" | sha256sum -c - \
+ && tar -xJf ffmpeg.tar.xz && cd "ffmpeg-${FFMPEG_VERSION}" \
+ && ./configure --prefix=/opt/ffmpeg --enable-shared --disable-static --disable-debug \
+      --disable-programs --disable-doc --disable-network --disable-autodetect --disable-everything \
+      --disable-avdevice --disable-avfilter --enable-swresample \
+      --enable-zlib --enable-libdav1d --enable-libwebp \
+      --enable-demuxer=mov,matroska,avi,mpegts,flv,ogg,gif,apng,image2pipe,image_png_pipe,image_jpeg_pipe,image_jpegls_pipe,image_jpegxl_pipe,image_webp_pipe,image_bmp_pipe,image_tiff_pipe,image_qoi_pipe,image_pgm_pipe,image_ppm_pipe,image_pbm_pipe,image_pam_pipe,image_gif_pipe,wav,w64,mp3,flac,aac,aiff \
+      --enable-decoder=h264,hevc,vp8,vp9,libdav1d,mpeg4,mpeg1video,mpeg2video,mjpeg,jpegls,png,apng,gif,webp,bmp,tiff,qoi,pgm,ppm,pbm,pam,pgmyuv,theora,vp3,flv,h263,pcm_u8,pcm_s16le,pcm_s16be,pcm_s24le,pcm_s24be,pcm_s32le,pcm_s32be,pcm_f32le,pcm_f32be,pcm_f64le,pcm_alaw,pcm_mulaw,mp3float,mp2float,flac,vorbis,opus,aac \
+      --enable-encoder=png,mjpeg,libwebp,libopenh264,aac --enable-muxer=mp4 --enable-libopenh264 \
+      --enable-parser=h264,hevc,vp8,vp9,av1,mpeg4video,mpegvideo,mjpeg,png,gif,bmp,webp,vp3,qoi,pnm,h263,jpegxl,mpegaudio,flac,aac,vorbis,opus \
+ && make -j"${JOBS:-$(nproc)}" \
+ && make install \
+ && mkdir -p /opt/ffmpeg/share/doc/ffmpeg \
+ && cp LICENSE.md COPYING.LGPLv2.1 /opt/ffmpeg/share/doc/ffmpeg/ \
+ && sed -n 's/^#define FFMPEG_CONFIGURATION "\(.*\)"$/\1/p' config.h \
+      > /opt/ffmpeg/share/doc/ffmpeg/CONFIGURATION \
+ && echo "https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz, sha256 ${FFMPEG_SHA256}" \
+      > /opt/ffmpeg/share/doc/ffmpeg/SOURCE
+
+
+FROM docker.io/rocm/dev-ubuntu-${UBUNTU_VERSION}:${ROCM_VERSION} AS builder
+ARG JOBS=8
+ARG RADIANCE_REF
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends     git cmake ninja-build pkg-config g++-14 gawk libopenblas-dev     libdav1d7 libwebp7 libopenh264-7 ca-certificates  && rm -rf /var/lib/apt/lists/*
+COPY --from=ffmpeg /opt/ffmpeg /opt/ffmpeg
+ENV ROCM_PATH=/opt/rocm HIP_PATH=/opt/rocm CC=gcc-14 CXX=g++-14     PKG_CONFIG_PATH=/opt/ffmpeg/lib/pkgconfig
+RUN printf '%s\n' /opt/ffmpeg/lib /opt/rocm/lib > /etc/ld.so.conf.d/radiance-build.conf && ldconfig
+RUN test -n "$RADIANCE_REF" && git init /src && cd /src  && git remote add origin https://codeberg.org/StillDeadcode/radiance.git  && git fetch --depth 1 origin "$RADIANCE_REF" && git checkout --detach FETCH_HEAD
+WORKDIR /src
+RUN cmake -S . -B /build -G Ninja -DCMAKE_BUILD_TYPE=Release     -DCMAKE_INSTALL_PREFIX=/opt/radiance -DRAD_WITH_HIP=ON -DRAD_WITH_FFMPEG=ON     -DRAD_GPU_TARGETS=gfx1201 -DRAD_HIP_VOPD_REPEATABLE=OFF  && cmake --build /build -j"$JOBS" && cmake --install /build  && mkdir -p /opt/radiance/share/radiance/recipes /opt/radiance/share/doc/radiance  && cp data/recipes/*.recipe /opt/radiance/share/radiance/recipes/  && cp LICENSE NOTICE /opt/radiance/share/doc/radiance/  && git rev-parse HEAD > /opt/radiance/share/doc/radiance/source-revision  && /opt/rocm/bin/hipcc --version > /opt/radiance/share/doc/radiance/compiler-version.txt  && dpkg-query -W > /opt/radiance/share/doc/radiance/build-packages.txt
+
+FROM builder AS tested
+ARG TEST_JOBS=8
+RUN ctest --test-dir /build -LE 'gpu|oot' -j"$TEST_JOBS" --output-on-failure  && touch /opt/radiance/share/doc/radiance/host-tests-passed
+
+FROM tested AS packaged
+COPY radiance/collect-runtime.py /collect-runtime.py
+RUN python3 /collect-runtime.py \
+ && sh /src/docker/licenses.sh /runtime-licenses $(cat /opt/radiance/share/doc/radiance/copied-runtime-paths.txt) \
+ && mv /runtime-licenses/usr/share/doc/THIRD-PARTY /runtime-licenses/usr/share/doc/COPIED-ROCM-RUNTIME \
+ && python3 -c "from pathlib import Path; p=Path('/runtime-licenses/usr/share/doc/COPIED-ROCM-RUNTIME'); s=p.read_text(); a=s.index('/opt/radiance is'); b=s.index('The Ubuntu and ROCm packages'); p.write_text(s[:a]+'This receipt covers the ROCm libraries copied from the build image. Ubuntu runtime packages retain their distribution license files in /usr/share/doc/. Radiance and FFmpeg notices are under their /opt prefixes.\\n\\n'+s[b:])"
+
+FROM docker.io/library/ubuntu:${UBUNTU_VERSION} AS toolbox
+ARG RADIANCE_REF
+LABEL org.opencontainers.image.title="Standalone Radiance R9700 toolbox"       org.opencontainers.image.source="https://github.com/kyuz0/amd-r9700-ai-toolboxes"       org.opencontainers.image.licenses="Apache-2.0"       radiance.source.ref="${RADIANCE_REF}"
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends     bash sudo passwd libcap2-bin procps iproute2 util-linux curl jq ca-certificates     libstdc++6 libgcc-s1 libgomp1 libnuma1 libdrm2 libdrm-amdgpu1     libopenblas0-pthread libdav1d7 libwebp7 libopenh264-7 libzstd1 zlib1g  && rm -rf /var/lib/apt/lists/*
+# Toolbx creates the host user; Ubuntu's default UID1000 account conflicts with it.
+RUN if getent passwd ubuntu >/dev/null; then userdel ubuntu; fi \
+ && if getent group ubuntu >/dev/null; then groupdel ubuntu; fi
+COPY --from=packaged /opt/radiance /opt/radiance
+COPY --from=packaged /opt/ffmpeg /opt/ffmpeg
+COPY --from=packaged /runtime-licenses/usr/share/ /usr/share/
+ENV PATH=/opt/radiance/bin:$PATH     LD_LIBRARY_PATH=/opt/radiance/lib/runtime:/opt/ffmpeg/lib     GPU_MAX_ALLOC_PERCENT=100 GPU_MAX_HEAP_SIZE=100
+RUN printf '%s\n' /opt/radiance/lib/runtime /opt/ffmpeg/lib > /etc/ld.so.conf.d/radiance.conf  && ldconfig && radiance --help >/dev/null && rad-info --plugins >/dev/null
+WORKDIR /home
+CMD ["/bin/bash"]

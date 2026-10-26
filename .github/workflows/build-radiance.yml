@@ -1,0 +1,96 @@
+name: Build & Publish Standalone Radiance
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_revision:
+        description: Exact standalone Radiance commit to build (qualify before changing the default)
+        required: true
+        default: 5a9ce4912bb4ae5315e4a177f9e7d5b10d035766
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-radiance-rocm-10-1
+  cancel-in-progress: false
+
+env:
+  IMAGE: docker.io/kyuz0/amd-r9700-toolboxes
+  CHANNEL: radiance-rocm-10.1
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Resolve pinned standalone Radiance source
+        id: source
+        shell: bash
+        env:
+          REVISION: ${{ inputs.source_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]]
+          git init /tmp/radiance-source
+          git -C /tmp/radiance-source fetch --depth 1 https://codeberg.org/StillDeadcode/radiance.git "$REVISION"
+          revision=$(git -C /tmp/radiance-source rev-parse 'FETCH_HEAD^{commit}')
+          test "$revision" = "$REVISION"
+          echo "tag=src-${revision:0:12}" >> "$GITHUB_OUTPUT"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and run required host checks
+        uses: docker/build-push-action@v6
+        with:
+          context: toolboxes
+          file: toolboxes/Dockerfile.radiance-rocm-10.1
+          load: true
+          tags: radiance-check:latest
+          build-args: |
+            RADIANCE_REF=${{ steps.source.outputs.revision }}
+            JOBS=2
+            TEST_JOBS=2
+          cache-from: type=gha,scope=radiance-stock-rocm101
+          cache-to: type=gha,mode=max,scope=radiance-stock-rocm101
+      - name: Check native toolbox and capture provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network none radiance-check:latest radiance --help
+          docker run --rm --network none radiance-check:latest rad-info --plugins
+          mkdir -p build-provenance
+          docker create --name radiance-receipt radiance-check:latest
+          docker cp radiance-receipt:/opt/radiance/share/doc/radiance/. build-provenance/
+          docker rm radiance-receipt
+          test -f build-provenance/host-tests-passed
+          test "$(cat build-provenance/source-revision)" = '${{ steps.source.outputs.revision }}'
+          docker image inspect radiance-check:latest > build-provenance/image.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: standalone-radiance-build-provenance
+          path: build-provenance/
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Publish immutable and rolling tags
+        shell: bash
+        env:
+          SOURCE: ${{ steps.source.outputs.revision }}
+          RELEASE: ${{ steps.source.outputs.tag }}
+        run: |
+          set -euo pipefail
+          immutable="${CHANNEL}_${RELEASE}_$(date -u +%Y%m%dT%H%M%SZ)_${SOURCE:0:12}_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          docker tag radiance-check:latest "$IMAGE:$immutable"
+          docker tag radiance-check:latest "$IMAGE:$CHANNEL"
+          docker push "$IMAGE:$immutable"
+          docker push "$IMAGE:$CHANNEL"
+          {
+            echo 'Standalone Radiance source-built with the supplied ROCm compiler.'
+            echo "Source: $RELEASE ($SOURCE)"
+            echo "Images: $IMAGE:$immutable and $IMAGE:$CHANNEL"
+            echo 'Host tests and native smokes passed. GPU qualification is recorded separately.'
+          } >> "$GITHUB_STEP_SUMMARY"
