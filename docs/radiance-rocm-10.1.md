@@ -32,7 +32,7 @@ These containers include their tokenizer, vision and drafting tensors. A GGUF or
 | Model | Repository revision | File | Bytes | GPU layout |
 | --- | --- | --- | ---: | --- |
 | Qwen3.8-27B FP8 | `StillDeadcode/qwen3.8-27b-fp8@edd43fda378af6b3b5e8981b6e936145be9608fd` | `qwen3.8-27b-fp8.rad` | 30,783,856,640 | TP2 or TP4 |
-| Qwen3.8-27B MXFP4 | `StillDeadcode/qwen3.8-27b-mxfp4@60bd4139f335205fbc120e5534329c30b691af0e` | `qwen3.8-27b-mxfp4.rad` | 19,377,119,232 | TP1 |
+| Qwen3.8-27B MXFP4 | `StillDeadcode/qwen3.8-27b-mxfp4@60bd4139f335205fbc120e5534329c30b691af0e` | `qwen3.8-27b-mxfp4.rad` | 19,377,119,232 | TP1 or TP4 |
 | Qwen3.8-Flash-Next FP8/IQ4R | `StillDeadcode/qwen3.8-next-flash-fp8-iq4r-moe@8267a67384583f6be309981baf878b09ff900a9a` | `qwen3.8-next-flash-fp8-iq4r-moe.rad` | 121,969,901,568 | TP4 |
 
 Use a pinned Hugging Face download or Cockpit's native model manager. The downloader's native transfer checks and exact file-size/revision coverage establish acquisition; inference qualification is separate.
@@ -76,6 +76,23 @@ The 144 hybrid-state checkpoints reserve about 20.65 GiB of host RAM in addition
 | 16 | DFlash2-7 | 6,300.50 / 578.32 | 500.77 / 61.27 |
 
 Both modes completed all nine history depths with two repeats, totaling 1,044 measured requests with matching logical prime/follow-up inputs. At 64K, one, four and eight requests retained the complete history; sixteen requests retained a mean 49,280 tokens and replayed 16,256 in both modes. These rates include that replay. See the [complete paired speed curves](https://local-llm-benchmarks.dev/speed) by selecting R9700, four GPUs, Qwen3.8-27B, FP8 and Standalone Radiance, then the request count and decoding mode.
+
+## Four-GPU Qwen27 MXFP4
+
+The native MXFP4 artifact completed the same four-card target-only and DFlash2-7 workload. Select `qwen3.8-27b-mxfp4.rad` and use `--tp 4 --max-model-len 67840 --max-num-seqs 16 --checkpoint-slots 144`, with `--num-speculative-tokens 0` or `7`. This uses the [same FP8-KV and host-checkpoint allocation](#four-gpu-qwen27-fp8) described above, including about 20.65 GiB of host state. All rows use four GPUs; request count is client concurrency.
+
+| Requests | Mode | Aggregate PP / TG at 8K (tokens/s) | Aggregate PP / TG at 64K (tokens/s) |
+| ---: | --- | ---: | ---: |
+| 1 | Target only | 6,951.52 / 100.62 | 4,845.35 / 88.95 |
+| 1 | DFlash2-7 | 6,866.16 / 341.85 | 4,753.74 / 255.33 |
+| 4 | Target only | 6,583.42 / 296.00 | 3,732.60 / 210.89 |
+| 4 | DFlash2-7 | 6,475.65 / 589.78 | 3,721.66 / 342.43 |
+| 8 | Target only | 6,456.68 / 399.35 | 3,789.61 / 249.09 |
+| 8 | DFlash2-7 | 6,477.50 / 591.26 | 3,794.28 / 324.65 |
+| 16 | Target only | 6,466.94 / 485.15 | 461.67 / 54.06 |
+| 16 | DFlash2-7 | 6,441.93 / 575.80 | 513.90 / 63.59 |
+
+Both modes completed all nine depths and two repeats: 1,044 measured requests with matching logical prime/follow-up inputs. At 64K, one, four and eight requests retained all history; sixteen retained a mean 49,280 tokens and replayed 16,256 in both modes. The rates include this replay. In the [speed viewer](https://local-llm-benchmarks.dev/speed), select R9700, four GPUs, Qwen3.8-27B, MXFP4 and Standalone Radiance to compare both full curves at the desired request count.
 
 ## Launch Flash Next
 
