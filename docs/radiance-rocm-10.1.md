@@ -31,7 +31,7 @@ These containers include their tokenizer, vision and drafting tensors. A GGUF or
 
 | Model | Repository revision | File | Bytes | GPU layout |
 | --- | --- | --- | ---: | --- |
-| Qwen3.8-27B FP8 | `StillDeadcode/qwen3.8-27b-fp8@edd43fda378af6b3b5e8981b6e936145be9608fd` | `qwen3.8-27b-fp8.rad` | 30,783,856,640 | TP2 |
+| Qwen3.8-27B FP8 | `StillDeadcode/qwen3.8-27b-fp8@edd43fda378af6b3b5e8981b6e936145be9608fd` | `qwen3.8-27b-fp8.rad` | 30,783,856,640 | TP2 or TP4 |
 | Qwen3.8-27B MXFP4 | `StillDeadcode/qwen3.8-27b-mxfp4@60bd4139f335205fbc120e5534329c30b691af0e` | `qwen3.8-27b-mxfp4.rad` | 19,377,119,232 | TP1 |
 | Qwen3.8-Flash-Next FP8/IQ4R | `StillDeadcode/qwen3.8-next-flash-fp8-iq4r-moe@8267a67384583f6be309981baf878b09ff900a9a` | `qwen3.8-next-flash-fp8-iq4r-moe.rad` | 121,969,901,568 | TP4 |
 
@@ -57,6 +57,25 @@ podman run --rm -it --name radiance-server \
 For MXFP4, select its file and use `--tp 1`. The FP8 bundled DFlash2 profile uses `--num-speculative-tokens 7`. Vision remains enabled; `--mm-max-patches 0` disables image input. Context includes both prompt and generated tokens; additional sessions require additional cache capacity.
 
 The API exposes `/health`, `/v1/models`, `/v1/chat/completions`, raw `/v1/completions`, `/tokenize` and `/metrics`. Qwen's sampled thinking profile uses temperature 1.0, top-p 0.95, top-k 20, min-p 0 and explicit thinking. The sampled non-thinking profile uses temperature 0.7, top-p 0.8, top-k 20, min-p 0 and presence penalty 1.5. Request settings override server defaults; select the thinking mode explicitly in clients.
+
+## Four-GPU Qwen27 FP8
+
+The native FP8 artifact also completed matched target-only and DFlash2-7 depth curves on four R9700s with the same published Radiance 1.12.0 image. To reproduce the measured allocation, use the FP8 command above with `--tp 4 --max-model-len 67840 --max-num-seqs 16` and add `--checkpoint-slots 144`. Keep `--num-speculative-tokens 0` for target-only decoding or select `7` for DFlash2. FP8 KV, exact inter-GPU communication and GPU weight placement remain as shown above.
+
+The 144 hybrid-state checkpoints reserve about 20.65 GiB of host RAM in addition to other process memory. The model weights remain in VRAM. The server allocates 16 sequences; the client separately selects how many requests run simultaneously. Every row below uses all four GPUs, including the one-request rows.
+
+| Requests | Mode | Aggregate PP / TG at 8K (tokens/s) | Aggregate PP / TG at 64K (tokens/s) |
+| ---: | --- | ---: | ---: |
+| 1 | Target only | 6,826.65 / 69.37 | 4,791.81 / 63.78 |
+| 1 | DFlash2-7 | 6,593.97 / 243.64 | 4,708.50 / 133.89 |
+| 4 | Target only | 6,308.07 / 219.81 | 3,672.79 / 170.67 |
+| 4 | DFlash2-7 | 6,326.95 / 494.47 | 3,689.00 / 269.16 |
+| 8 | Target only | 6,259.07 / 322.27 | 3,725.17 / 218.62 |
+| 8 | DFlash2-7 | 6,340.79 / 551.27 | 3,735.80 / 304.06 |
+| 16 | Target only | 6,182.95 / 419.47 | 455.62 / 52.70 |
+| 16 | DFlash2-7 | 6,300.50 / 578.32 | 500.77 / 61.27 |
+
+Both modes completed all nine history depths with two repeats, totaling 1,044 measured requests with matching logical prime/follow-up inputs. At 64K, one, four and eight requests retained the complete history; sixteen requests retained a mean 49,280 tokens and replayed 16,256 in both modes. These rates include that replay. See the [complete paired speed curves](https://local-llm-benchmarks.dev/speed) by selecting R9700, four GPUs, Qwen3.8-27B, FP8 and Standalone Radiance, then the request count and decoding mode.
 
 ## Launch Flash Next
 
