@@ -1,0 +1,40 @@
+# Stable Strata DeepSeek V4.1 HIP build; upstream pins its ggml dependency.
+FROM docker.io/library/ubuntu:26.04 AS rocm-sdk
+ARG ROCM_PKG_VERSION=10.1.0-3
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gpg \
+    && install -d -m 0755 /etc/apt/keyrings \
+    && curl -fsSL https://stable.repo.amd.com/rocm/gpg/packages.gpg -o /etc/apt/keyrings/amdrocm.asc \
+    && fingerprint="$(gpg --batch --with-colons --show-keys /etc/apt/keyrings/amdrocm.asc | awk -F: '$1 == "fpr" { print $10; exit }')" \
+    && test "$fingerprint" = D0F004A0025A1145C7807FCD0701EAC4D5E02107 \
+    && chmod 0644 /etc/apt/keyrings/amdrocm.asc \
+    && printf '%s\n' 'deb [arch=amd64 signed-by=/etc/apt/keyrings/amdrocm.asc] https://stable.repo.amd.com/rocm/core/packages/ubuntu2604 stable main' > /etc/apt/sources.list.d/amdrocm.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        amdrocm-runtime10.1="${ROCM_PKG_VERSION}" \
+        amdrocm-runtime-dev10.1="${ROCM_PKG_VERSION}" \
+    && apt-get purge -y --auto-remove gpg \
+    && rm -rf /var/lib/apt/lists/* /root/.gnupg
+# The packages install only core-10.1; expose the host's active-root layout.
+RUN for name in bin lib include llvm amdgcn share libexec .info; do \
+        ln -s "core-10.1/$name" "/opt/rocm/$name"; \
+    done
+ENV ROCM_PATH=/opt/rocm \
+    PATH="/opt/rocm/bin:${PATH}"
+
+
+FROM rocm-sdk AS toolbox
+ARG SOURCE_REVISION
+ARG JOBS=2
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake ninja-build git python3 python3-pip sudo rsync procps amdrocm-blas-dev10.1=10.1.0-3 amdrocm-blas10.1-gfx1201=10.1.0-3 && rm -rf /var/lib/apt/lists/*
+ENV HIP_PATH=/opt/rocm LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib/rocm_sysdeps/lib
+COPY source /opt/strata
+RUN test -n "$SOURCE_REVISION" && test "$(git -C /opt/strata rev-parse HEAD)" = "$SOURCE_REVISION"
+RUN cmake -S /opt/strata -B /opt/strata/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=OFF -DSTRATA_ENABLE_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx1201 -DCMAKE_HIP_COMPILER=/opt/rocm/llvm/bin/clang++ -DCMAKE_PREFIX_PATH=/opt/rocm -DSTRATA_BUILD_DSV41=ON -DSTRATA_NATIVE_EXPERTS=ON -DSTRATA_PORTABLE=ON -DSTRATA_BUILD_TESTS=OFF -DSTRATA_BUILD_ID=${SOURCE_REVISION} && cmake --build /opt/strata/build --target strata-dsv41 -j "$JOBS"
+RUN python3 -m pip install --break-system-packages --no-cache-dir -r /opt/strata/requirements.txt
+RUN install -m755 /opt/strata/build/strata-dsv41 /usr/local/bin/strata-dsv41 && strata-dsv41 --version && strata-dsv41 --help
+LABEL org.opencontainers.image.source="https://github.com/Niko1221/Strata" org.opencontainers.image.revision="${SOURCE_REVISION}" org.opencontainers.image.title="Strata DeepSeek V4.1 R9700 experimental toolbox" org.opencontainers.image.licenses="MIT"
+RUN set -eu; mkdir -p /opt/strata/share/toolbox; printf '%s\n' "$SOURCE_REVISION" > /opt/strata/share/toolbox/source-revision; dpkg-query -W > /opt/strata/share/toolbox/packages.txt; if getent passwd ubuntu >/dev/null; then userdel ubuntu; fi; if getent group ubuntu >/dev/null; then groupdel ubuntu; fi
+ENV PYTHONPATH=/opt/strata
+WORKDIR /home
+CMD ["/bin/bash"]

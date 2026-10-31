@@ -1,0 +1,2 @@
+# Unified patch context contains significant blank-line markers.
+toolboxes/quad/*.patch -whitespace

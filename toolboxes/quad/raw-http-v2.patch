@@ -1,0 +1,150 @@
+--- a/tools/affinity.cpp
++++ b/tools/affinity.cpp
+@@ -321,6 +321,7 @@
+   std::string force_list;
+   bool no_routed = false;
+   bool ignore_eos = false;
++  bool raw_completions = false;
+   // One-shot sampling. Greedy by default because it is reproducible, but temperature 0 degenerates
+   // and changes which experts route, so a throughput or acceptance figure should be taken at real
+   // sampler settings with a fixed seed instead.
+@@ -402,6 +403,7 @@
+     else if (a == "--force-tokens") force_list = nxt();
+     else if (a == "--no-routed-experts") no_routed = true;
+     else if (a == "--ignore-eos") ignore_eos = true;
++    else if (a == "--raw-completions") raw_completions = true;
+     else if (a == "--gpu-mib") gpu_budget_mib = std::strtod(nxt(), nullptr);
+     else if (a == "--host-pool-mib") host_pool_mib = std::strtod(nxt(), nullptr);
+     else if (a == "--dspark") {
+@@ -477,6 +479,7 @@
+         "Model and memory\n"
+         "  -m, --model FILE            .aff model container (required)\n"
+         "      --tokenizer FILE        tokenizer.json\n"
++        "      --raw-completions      raw text /v1/completions with ignore_eos and cache usage\n"
+         "      --dspark on|off         speculative decode via the DSpark draft (default on). Off\n"
+         "                              runs the same block verify one token wide and does not load\n"
+         "                              the draft, handing its VRAM back to the routed experts. The\n"
+@@ -2321,7 +2324,8 @@
+       return;
+     }
+ 
+-    const std::string prompt = encode_messages(msgs, eo);
++    const bool raw_mode = raw_completions && req.raw_prompt;
++    const std::string prompt = raw_mode ? req.prompt : encode_messages(msgs, eo);
+     // add_bos false: the encoder put the BOS in the string, and a second one is a different prompt.
+     std::vector<uint32_t> ids = tok.vocab_size() ? tok.encode(prompt, false)
+                                                  : std::vector<uint32_t>{1};
+@@ -2402,6 +2406,7 @@
+                      rerr.c_str(), n_pre);
+       }
+     }
++    res->cached_tokens = from;  // Actual successful restore, before any recomputation/promotion.
+     // ---- the promotion boundary --------------------------------------------------------------
+     //
+     // `lookup` returns two different numbers and both of them matter. `from` is where a
+@@ -2561,7 +2566,7 @@
+     // client's transcript as if it were the reply — but dropping it is just as wrong, because a
+     // client that renders reasoning has nothing to render. So it goes out as `reasoning_content`
+     // until the block closes, and as content after.
+-    bool open_think = eo.thinking_mode == ThinkingMode::Thinking;
++    bool open_think = !raw_mode && eo.thinking_mode == ThinkingMode::Thinking;
+     size_t think_streamed = 0;
+     // A token boundary is not a character boundary: an emoji arrives as two tokens, and cutting
+     // between them puts half a character in a JSON string, which is not valid UTF-8 and not valid
+@@ -2593,9 +2598,30 @@
+     const Model::PhaseProfile p_before = model.profile();
+     const auto t_dec0 = std::chrono::steady_clock::now();
+     const uint32_t made = spec_decode(slot, st, blk, ids.empty() ? 1u : ids.back(), hist, total_budget,
+-                                      /*ignore_eos_=*/false, [&](uint32_t id) {
+-      if ((int32_t)id == tok.eos()) return false;
++                                      /*ignore_eos_=*/raw_mode && req.ignore_eos, [&](uint32_t id) {
++      if ((int32_t)id == tok.eos() && !(raw_mode && req.ignore_eos)) return false;
+       raw += tok.vocab_size() ? tok.decode_one(id) : std::string();
++      if (raw_mode) {
++        size_t safe = raw.size();
++        bool stopped = false;
++        for (const auto& stop : req.stop) {
++          if (stop.empty()) continue;
++          const size_t at = raw.find(stop, streamed);
++          if (at != std::string::npos && at < safe) { safe = at; stopped = true; }
++        }
++        if (!stopped) {
++          for (const auto& stop : req.stop)
++            for (size_t n = std::min(stop.empty() ? size_t(0) : stop.size()-1, safe-streamed); n; --n)
++              if (raw.compare(safe-n,n,stop,0,n)==0) { safe-=n; break; }
++          safe = utf8_end(raw,safe);
++        }
++        if (safe > streamed) {
++          const auto piece=raw.substr(streamed,safe-streamed);streamed=safe;
++          if (!sink(piece,Delta::Content,false)) return false;
++        }
++        if (stopped) raw.resize(safe);
++        return !stopped;
++      }
+       if (open_think) {
+         const size_t te = raw.find(think_end);
+         // Everything up to the closing marker is reasoning. Hold back any tail that could still
+@@ -2669,7 +2695,11 @@
+     // already does after a rejected tail, and it is safe for the same reason: the rows above `upto`
+     // are overwritten by the next tokens before anything reads them.
+     if (prefix_cache.ready() && !hist.empty()) {
+-      const uint32_t upto = (uint32_t)std::min<size_t>(st.pos, hist.size());
++      // A raw one-token request is also used to prime an input prefix. Speculative
++      // verification can have consumed its generated token; do not let that discarded
++      // output become a cache hit in the following request. Keep normal turns unchanged.
++      const size_t cache_end = raw_mode && total_budget == 1 ? ids.size() : hist.size();
++      const uint32_t upto = (uint32_t)std::min<size_t>(st.pos, cache_end);
+       if (st.pos > upto) model.rollback(&st, upto);
+       std::string perr;
+       if (upto && !prefix_cache.publish(hist.data(), upto, &perr))
+@@ -2705,6 +2735,10 @@
+       sink(raw.substr(streamed), Delta::Content, false);
+     }
+ 
++    if (raw_mode) {
++      res->content=raw; res->finish_reason=hit_budget ? "length" : "stop";
++      sink("", Delta::Content, true); return;
++    }
+     const ThinkingMode tm = eo.thinking_mode;
+     ParsedMessage pm = parse_completion(raw + kEosStr, tm);
+     if (tm == ThinkingMode::Thinking && raw.find(kThinkEnd) == std::string::npos) {
+--- a/src/server/server.h
++++ b/src/server/server.h
+@@ -45,6 +45,8 @@
+   // No `repetition_penalty`: the served path samples on the device, and the device sampler takes
+   // temperature, top_p, top_k and min_p only. Parsing it here and dropping it would leave a client
+   // believing a knob it sent had an effect.
++  bool raw_prompt = false;
++  bool ignore_eos = false;
+   bool stream = false;
+   // stream_options.include_usage: OpenAI appends one extra chunk carrying usage and no choices.
+   bool include_usage = false;
+@@ -71,6 +73,7 @@
+   // it on every reply. Counted in tokens, so reasoning counts toward completion as it does upstream.
+   uint32_t prompt_tokens = 0;
+   uint32_t completion_tokens = 0;
++  uint32_t cached_tokens = 0;
+   // Set when the request cannot be served as asked. The server answers 400 rather than an empty
+   // completion, so the caller sees a refusal instead of a model that had nothing to say.
+   std::string error;
+--- a/src/server/server.cpp
++++ b/src/server/server.cpp
+@@ -130,7 +130,8 @@
+   const uint64_t t = (uint64_t)g.prompt_tokens + g.completion_tokens;
+   return "\"usage\":{\"prompt_tokens\":" + std::to_string(g.prompt_tokens) +
+          ",\"completion_tokens\":" + std::to_string(g.completion_tokens) +
+-         ",\"total_tokens\":" + std::to_string(t) + "}";
++         ",\"total_tokens\":" + std::to_string(t) +
++         ",\"prompt_tokens_details\":{\"cached_tokens\":" + std::to_string(g.cached_tokens) + "}}";
+ }
+ 
+ // The raw text of the value at `key`, braces and all. The parser above reads scalars; tools and
+@@ -183,6 +184,8 @@
+ }
+ 
+ bool parse_completion_request(const std::string& body, bool chat, CompletionRequest* out) {
++  out->raw_prompt = !chat;
++  if (const char* p = find_top_key(body, "ignore_eos")) out->ignore_eos = std::strncmp(skip_ws(p), "true", 4) == 0;
+   if (const char* p = find_top_key(body, "model")) { const char* q = p; out->model = read_json_string(q); }
+   // `max_completion_tokens` is the current OpenAI spelling and `max_tokens` the deprecated one;
+   // clients send either, and reading only one silently ignores the caller's limit.

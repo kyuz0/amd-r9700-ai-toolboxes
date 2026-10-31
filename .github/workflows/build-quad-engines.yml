@@ -1,0 +1,104 @@
+name: Build quad R9700 engine candidates
+
+on:
+  workflow_dispatch:
+    inputs:
+      engine:
+        type: choice
+        options: [all, affinity, hipfire, strata]
+        default: all
+        description: Engine candidate to build
+      source_revision:
+        default: latest
+        description: Latest stable source or exact forty-character commit
+  pull_request:
+    paths:
+      - toolboxes/quad/**
+      - .github/workflows/build-quad-engines.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.engine != 'all' && format('["{0}"]', inputs.engine) || '["affinity","hipfire","strata"]') }}
+    concurrency:
+      group: quad-candidate-${{ matrix.engine }}-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      IMAGE: docker.io/kyuz0/amd-r9700-toolboxes
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Free ephemeral runner disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: Resolve source and build context
+        id: source
+        env:
+          REVISION: ${{ inputs.source_revision || 'latest' }}
+          ENGINE: ${{ matrix.engine }}
+        run: python3 toolboxes/quad/prepare-build.py "$ENGINE" --revision "$REVISION" --destination "$RUNNER_TEMP/quad-build"
+      - uses: docker/setup-buildx-action@v3
+      - name: Build candidate from source
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ steps.source.outputs.context }}
+          file: ${{ steps.source.outputs.dockerfile }}
+          load: true
+          tags: quad-candidate:check
+          build-args: |
+            SOURCE_REVISION=${{ steps.source.outputs.source_revision }}
+            HIPFIRE_REVISION=${{ steps.source.outputs.source_revision }}
+            HIPFIRE_VERSION=${{ steps.source.outputs.version }}
+            HIPFIRE_GPU_ARCHES=gfx1201
+            JOBS=2
+          cache-from: type=gha,scope=quad-${{ matrix.engine }}
+          cache-to: type=gha,mode=max,scope=quad-${{ matrix.engine }}
+      - name: Smoke actual executable and capture provenance
+        env:
+          ENGINE: ${{ matrix.engine }}
+          REVISION: ${{ steps.source.outputs.source_revision }}
+        run: |
+          set -euo pipefail
+          mkdir -p provenance
+          cp "$RUNNER_TEMP/quad-build/source-provenance.json" provenance/
+          case "$ENGINE" in
+            affinity) binary=affinity ;;
+            hipfire) binary=hipfire ;;
+            strata) binary=strata-dsv41 ;;
+          esac
+          docker run --rm --network none quad-candidate:check "$binary" --help > provenance/help.txt
+          test "$(docker run --rm --network none quad-candidate:check cat /opt/$ENGINE/share/toolbox/source-revision)" = "$REVISION"
+          docker image inspect quad-candidate:check > provenance/image.json
+          echo 'CPU build/help only. Actual GPU qualification is required before channel promotion.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: docker/login-action@v3
+        if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Publish immutable candidate only
+        if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          CHANNEL: ${{ steps.source.outputs.channel }}
+          REVISION: ${{ steps.source.outputs.source_revision }}
+        run: |
+          set -euo pipefail
+          tag="${CHANNEL}_candidate_${REVISION:0:12}_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          docker tag quad-candidate:check "$IMAGE:$tag"
+          docker push "$IMAGE:$tag"
+          printf '%s\n' "$IMAGE:$tag" > provenance/candidate-image.txt
+          echo "Candidate: $IMAGE:$tag. Rolling channel remains unchanged until GPU qualification." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quad-${{ matrix.engine }}-provenance
+          path: provenance/
