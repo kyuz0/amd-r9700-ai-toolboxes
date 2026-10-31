@@ -19,3 +19,7 @@ CI runs the real executable's help command, checks its installed source identity
 `strata-serve --pack PACK --context 8192 --decoding baseline --host 0.0.0.0 --port 18920` starts upstream `serve/server.py` with the four-GPU DeepSeek V4.1 configuration. Select `--decoding dspark` for its matched drafter. The profile uses one sequence, all four GPU IDs, native `--tp 1`, six routed experts and automatic expert mmap. The pack's expert profile is copied to temporary runtime storage so a read-only pack remains usable.
 
 The HTTP server exposes chat APIs. Native full-prompt timings and standard cached-history raw-Completions timings are separate measurements; API availability alone does not establish benchmark compatibility.
+
+## Channel promotion
+
+After reviewing actual-image GPU qualification, run **Promote qualified R9700 engine** with its exact manifest digest, full source revision and a link to the public qualification review. The workflow checks the registry config's architecture and source identity, copies that same manifest to a unique release tag and the engine's rolling `ENGINE-rocm-10.1` channel, then verifies both digests. It does not rebuild or select a different candidate. Record the previous channel digest before promotion for rollback.

@@ -1,0 +1,84 @@
+name: Promote qualified R9700 engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      engine:
+        type: choice
+        options: [affinity, hipfire, strata]
+        required: true
+        description: Engine whose actual candidate passed target-GPU qualification
+      digest:
+        required: true
+        description: Qualified candidate manifest digest (sha256 followed by 64 hex digits)
+      source_revision:
+        required: true
+        description: Full source revision reported by the qualified image
+      qualification_url:
+        required: true
+        description: Public review containing actual-image install, model/feature and cleanup results
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    concurrency:
+      group: quad-channel-${{ inputs.engine }}
+      cancel-in-progress: false
+    env:
+      IMAGE: docker.io/kyuz0/amd-r9700-toolboxes
+      ENGINE: ${{ inputs.engine }}
+      DIGEST: ${{ inputs.digest }}
+      REVISION: ${{ inputs.source_revision }}
+      QUALIFICATION_URL: ${{ inputs.qualification_url }}
+    steps:
+      - name: Validate promotion identity
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from urllib.parse import urlparse
+          assert os.environ['ENGINE'] in {'affinity', 'hipfire', 'strata'}
+          assert re.fullmatch(r'sha256:[0-9a-f]{64}', os.environ['DIGEST'])
+          assert re.fullmatch(r'[0-9a-f]{40}', os.environ['REVISION'])
+          url = urlparse(os.environ['QUALIFICATION_URL'])
+          assert url.scheme == 'https' and url.netloc == 'github.com'
+          assert url.path.startswith('/kyuz0/amd-r9700-ai-toolboxes/')
+          PY
+      - name: Install registry client
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends skopeo
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Verify source and promote exact manifest
+        run: |
+          set -euo pipefail
+          skopeo inspect --config "docker://$IMAGE@$DIGEST" > config.json
+          python3 - <<'PY'
+          import json, os
+          config = json.load(open('config.json'))
+          assert config['architecture'] == 'amd64' and config['os'] == 'linux'
+          assert config['config']['Labels']['org.opencontainers.image.revision'] == os.environ['REVISION']
+          PY
+          channel="$ENGINE-rocm-10.1"
+          immutable="${channel}_release_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          for tag in "$immutable" "$channel"; do
+            skopeo copy --all --preserve-digests --authfile "$HOME/.docker/config.json" "docker://$IMAGE@$DIGEST" "docker://$IMAGE:$tag"
+            test "$(skopeo inspect --format '{{.Digest}}' "docker://$IMAGE:$tag")" = "$DIGEST"
+          done
+          printf 'Published %s:%s at %s\nQualification: %s\n' "$IMAGE" "$channel" "$DIGEST" "$QUALIFICATION_URL" >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY'
+          import json, os
+          keys = ['ENGINE', 'IMAGE', 'DIGEST', 'REVISION', 'QUALIFICATION_URL', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT']
+          json.dump({key.lower(): os.environ[key] for key in keys}, open('promotion.json', 'w'), indent=2)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quad-engine-promotion
+          path: |
+            config.json
+            promotion.json
