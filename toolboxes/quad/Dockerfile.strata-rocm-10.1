@@ -35,6 +35,9 @@ RUN python3 -m pip install --break-system-packages --no-cache-dir -r /opt/strata
 RUN install -m755 /opt/strata/build/strata-dsv41 /usr/local/bin/strata-dsv41 && strata-dsv41 --version && strata-dsv41 --help
 LABEL org.opencontainers.image.source="https://github.com/Niko1221/Strata" org.opencontainers.image.revision="${SOURCE_REVISION}" org.opencontainers.image.title="Strata DeepSeek V4.1 R9700 experimental toolbox" org.opencontainers.image.licenses="MIT"
 RUN set -eu; mkdir -p /opt/strata/share/toolbox; printf '%s\n' "$SOURCE_REVISION" > /opt/strata/share/toolbox/source-revision; dpkg-query -W > /opt/strata/share/toolbox/packages.txt; if getent passwd ubuntu >/dev/null; then userdel ubuntu; fi; if getent group ubuntu >/dev/null; then groupdel ubuntu; fi
+COPY strata-serve.py /usr/local/bin/strata-serve
+COPY strata-prepare.py /usr/local/bin/strata-prepare
+RUN chmod 0755 /usr/local/bin/strata-serve /usr/local/bin/strata-prepare && strata-serve --help && strata-prepare --help
 ENV PYTHONPATH=/opt/strata
 WORKDIR /home
 CMD ["/bin/bash"]

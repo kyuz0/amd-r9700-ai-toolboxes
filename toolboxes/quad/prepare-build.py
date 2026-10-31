@@ -43,6 +43,9 @@ if a.engine == 'hipfire':
 else:
     context = root
     dockerfile = recipes / ('Dockerfile.' + a.engine + '-rocm-10.1')
+    if a.engine == 'strata':
+        for name in ('strata-serve.py', 'strata-prepare.py'):
+            shutil.copyfile(recipes / name, root / name)
     if a.engine == 'affinity': shutil.copyfile(recipes / 'raw-http-v2.patch', root / 'raw-http-v2.patch')
 record = dict(engine=a.engine, repository=url, selector=selector, source_revision=revision, version=version, channel=a.engine + '-rocm-10.1', context=str(context), dockerfile=str(dockerfile))
 (root / 'source-provenance.json').write_text(json.dumps(record, indent=2) + '\n')
