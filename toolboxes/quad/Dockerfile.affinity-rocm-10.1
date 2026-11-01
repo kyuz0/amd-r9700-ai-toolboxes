@@ -1,0 +1,16 @@
+# Affinity's selected DeepSeek fork plus the qualified raw-HTTP/cache overlay.
+FROM docker.io/rocm/dev-ubuntu-24.04:10.1.0-full
+ARG SOURCE_REVISION
+ARG JOBS=2
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cmake ninja-build git bash sudo passwd python3 procps iproute2 curl ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY source /opt/affinity
+COPY raw-http-v2.patch /opt/affinity-raw-http-v2.patch
+RUN test -n "$SOURCE_REVISION" && test "$(git -C /opt/affinity rev-parse HEAD)" = "$SOURCE_REVISION" && git -C /opt/affinity apply --check /opt/affinity-raw-http-v2.patch && git -C /opt/affinity apply /opt/affinity-raw-http-v2.patch
+ENV ROCM_PATH=/opt/rocm HIP_PATH=/opt/rocm PATH=/opt/affinity/build:/opt/rocm/bin:$PATH LD_LIBRARY_PATH=/opt/rocm/lib
+# Portable CPU code: do not inherit the CI runner's -march=native ISA.
+RUN cmake -S /opt/affinity -B /opt/affinity/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAFF_HIP=ON -DAFF_GPU_ARCH=gfx1201 -DAFF_NATIVE=OFF -DAFF_HIPCC=/opt/rocm/bin/hipcc -DCMAKE_CXX_COMPILER=g++ && cmake --build /opt/affinity/build --target affinity -j "$JOBS"
+RUN mkdir -p /opt/affinity/share/toolbox && printf '%s\n' "$SOURCE_REVISION" > /opt/affinity/share/toolbox/source-revision && printf '%s\n' 'raw-http-v2; portable CPU; gfx1201' > /opt/affinity/share/toolbox/build-profile && dpkg-query -W > /opt/affinity/share/toolbox/packages.txt && affinity --help > /opt/affinity/share/toolbox/help.txt
+RUN if getent passwd ubuntu >/dev/null; then userdel ubuntu; fi; if getent group ubuntu >/dev/null; then groupdel ubuntu; fi
+LABEL org.opencontainers.image.title="Affinity R9700 experimental toolbox" org.opencontainers.image.source="https://github.com/kyuz0/amd-r9700-ai-toolboxes" org.opencontainers.image.revision="${SOURCE_REVISION}" org.opencontainers.image.licenses="MIT"
+WORKDIR /home
+CMD ["/bin/bash"]
