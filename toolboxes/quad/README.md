@@ -5,7 +5,7 @@ These source recipes package three distinct inference engines for Radeon AI PRO 
 | Engine | Source channel | ROCm | Native format | Intended profile |
 | --- | --- | --- | --- | --- |
 | Affinity | Maintained `neuromaniacMD/affinity` `v4-fixes` branch with the included HTTP-v2 overlay | 10.1 | `.aff`, matched `.dspark.aff`, tokenizer JSON | DeepSeek-V4-Flash-0731, four GPUs, GPU-resident target experts, target-only or DSpark, one sequence |
-| hipfire | Latest stable `warpfront/hipfire` release | 10.1 | MQ2R | DeepSeek-V4-Flash-0731, four GPUs, target-only, F32 KV |
+| hipfire | Compatible stable `warpfront/hipfire` release (0.4.4 for the curated 0731 MQ2R) | 10.1 | MQ2R | DeepSeek-V4-Flash-0731, four GPUs, target-only, F32 KV |
 | Strata | Latest stable `Niko1221/Strata` release | 10.1 | GSQ-RCO IQ2_XXS GGUF, Engram, auxiliary sidecars and native metadata | DeepSeek-V4.1-Flash-1017, four GPUs, six-expert routing with expert offload, target-only or DSpark, one sequence |
 
 The workflow **Build quad R9700 engine candidates** resolves and records the actual source commit. It can build all engines or one engine, with the latest stable source or an explicit full commit. Affinity's selected maintained branch has no versioned release; its resolved revision and the included overlay identify that build. CPU code is portable rather than compiled for the build runner's native ISA.
