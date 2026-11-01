@@ -76,7 +76,8 @@ jobs:
             hipfire) binary=hipfire ;;
             strata) binary=strata-dsv41 ;;
           esac
-          docker run --rm --network none quad-candidate:check "$binary" --help > provenance/help.txt
+          docker run --rm --network none quad-candidate:check "$binary" --help > provenance/help.txt 2>&1
+          test -s provenance/help.txt
           test "$(docker run --rm --network none quad-candidate:check cat /opt/$ENGINE/share/toolbox/source-revision)" = "$REVISION"
           docker image inspect quad-candidate:check > provenance/image.json
           echo 'CPU build/help only. Actual GPU qualification is required before channel promotion.' >> "$GITHUB_STEP_SUMMARY"

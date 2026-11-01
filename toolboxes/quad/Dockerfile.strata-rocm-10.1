@@ -38,6 +38,7 @@ RUN set -eu; mkdir -p /opt/strata/share/toolbox; printf '%s\n' "$SOURCE_REVISION
 COPY strata-serve.py /usr/local/bin/strata-serve
 COPY strata-prepare.py /usr/local/bin/strata-prepare
 RUN chmod 0755 /usr/local/bin/strata-serve /usr/local/bin/strata-prepare && strata-serve --help && strata-prepare --help
+RUN apt-get update && apt-get install -y --no-install-recommends libcap2-bin && rm -rf /var/lib/apt/lists/* && dpkg-query -W > /opt/strata/share/toolbox/packages.txt
 ENV PYTHONPATH=/opt/strata
 WORKDIR /home
 CMD ["/bin/bash"]
