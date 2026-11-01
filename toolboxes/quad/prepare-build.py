@@ -1,5 +1,5 @@
 """Resolve stable sources and prepare reviewed engine-specific build contexts."""
-import argparse, json, os, re, shutil, subprocess
+import argparse, json, os, re, shutil, subprocess, tomllib
 from pathlib import Path
 
 p = argparse.ArgumentParser()
@@ -35,6 +35,9 @@ subprocess.run(['git', '-C', str(source), 'checkout', '--detach', 'FETCH_HEAD'],
 revision = subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip()
 if a.revision != 'latest' and revision != a.revision: raise RuntimeError('Source pin mismatch')
 subprocess.run(['git', '-C', str(source), 'submodule', 'update', '--init', '--recursive', '--depth', '1'], check=True)
+# Explicit source builds retain the engine's real Cargo version in CLI/provenance.
+if a.engine == 'hipfire' and a.revision != 'latest':
+    version = tomllib.loads((source / 'Cargo.toml').read_text())['workspace']['package']['version']
 recipes = Path(__file__).resolve().parent
 if a.engine == 'hipfire':
     context = source
