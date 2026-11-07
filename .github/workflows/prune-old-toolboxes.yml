@@ -9,10 +9,6 @@ on:
       keep:
         description: Number of latest tags to keep
         default: "3"
-  workflow_run:
-    workflows: ["Build & Publish AMD R9700 Toolboxes"]
-    types: [completed]   # runs after success/failure/cancel
-    branches: [main]     
 
 jobs:
   prune:
@@ -54,8 +50,9 @@ jobs:
       - name: Prune old tags
         env:
           TOKEN: ${{ steps.login.outputs.token }}
-          KEEP: ${{ github.event.inputs.keep }}
+          KEEP: ${{ github.event.inputs.keep || '3' }}
         run: |
+          [[ "$KEEP" =~ ^[1-9][0-9]*$ ]] || { echo "keep must be a positive integer"; exit 1; }
           BACKENDS='${{ steps.mk.outputs.list }}'
           mapfile -t ARR < <(jq -r '.[]' <<< "$BACKENDS")
           base_url="https://hub.docker.com/v2/repositories/${NS}/${REPO}/tags"
@@ -78,6 +75,8 @@ jobs:
               echo "Nothing to delete."
               continue
             fi
+            # Build timestamps determine recency even after an old tag is restored.
+            mapfile -t tags < <(printf '%s\n' "${tags[@]}" | LC_ALL=C sort -ru)
             to_delete=("${tags[@]:KEEP}")
             for t in "${to_delete[@]}"; do
               echo "Deleting tag ${t}..."
