@@ -19,8 +19,13 @@ RUN dnf -y --nodocs --setopt=install_weak_deps=False \
   install \
   make gcc gcc-c++ cmake libcurl-devel ninja-build rdma-core-devel \
   amdrocm-core-devel10.0-gfx1201 \
-  git-core vim sudo rsync patch \
+  git-core vim sudo rsync patch curl \
   && dnf clean all && rm -rf /var/cache/dnf/*
+
+COPY fetch-amdgpu-top-rpm.sh /tmp/fetch-amdgpu-top-rpm
+RUN chmod 0755 /tmp/fetch-amdgpu-top-rpm \
+  && /tmp/fetch-amdgpu-top-rpm /tmp/amdgpu_top.rpm \
+  && rm -f /tmp/fetch-amdgpu-top-rpm
 
 ENV ROCM_PATH=/opt/rocm \
   HIP_PATH=/opt/rocm \
@@ -62,6 +67,8 @@ RUN chmod +x /usr/local/bin/gguf-vram-estimator.py
 # runtime stage
 FROM registry.fedoraproject.org/fedora-minimal:44
 
+COPY --from=builder /tmp/amdgpu_top.rpm /tmp/amdgpu_top.rpm
+
 # ROCm 10.0 Core SDK repository (TheRock release stream)
 RUN <<'EOF'
 tee /etc/yum.repos.d/rocm.repo <<REPO
@@ -81,8 +88,9 @@ RUN microdnf -y --nodocs --setopt=install_weak_deps=0 \
   install \
   bash ca-certificates libatomic libstdc++ libgcc libgomp libibverbs sudo \
   amdrocm10.0-gfx1201 \
-  radeontop procps-ng \
+  radeontop procps-ng /tmp/amdgpu_top.rpm \
   && microdnf clean all && rm -rf /var/cache/dnf/* \
+  && rm -f /tmp/amdgpu_top.rpm \
   && ln -s core-10.0 /opt/rocm/core \
   && ln -s core-10.0/bin /opt/rocm/bin \
   && ln -s core-10.0/include /opt/rocm/include \
