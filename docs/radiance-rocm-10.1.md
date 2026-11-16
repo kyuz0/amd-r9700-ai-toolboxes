@@ -1,117 +1,82 @@
-# Standalone Radiance on R9700
+# Standalone Radiance on four R9700s
 
-The `radiance-rocm-10.1` toolbox builds [Standalone Radiance](https://codeberg.org/StillDeadcode/radiance) from source for `gfx1201`, using ROCm 10.1 and its supplied compiler. It includes the native architecture/kernel plugins, media libraries, conversion tools and source/license receipts. It is a separate engine from the older vLLM Radiance toolbox.
+The `radiance-rocm-10.1` toolbox builds [Radiance](https://codeberg.org/StillDeadcode/radiance) for `gfx1201` with the supplied ROCm 10.1 compiler. The qualified configuration uses **four Radeon AI PRO R9700s and Qwen3.8-Flash-Next IQR-V4**, with native MTP speculative decoding. The tested host has a Threadripper 9970X and 64 GB system RAM.
 
-The qualified source is v1.12.0, commit `5a9ce4912bb4ae5315e4a177f9e7d5b10d035766`. The source build passed all 110 host tests. Qwen3.8-27B FP8 on two R9700s, MXFP4 on one R9700 and Flash Next FP8/IQ4R on four R9700s passed sampled text, thinking, image input and tool calls. Target-only and bundled drafting profiles completed the nine-depth C1 HTTP workload through 64K history, with 2,048 new prompt tokens and 256 output tokens per measurement.
+Radiance v2.1.0, commit `2a2b756371c26f2768b8d129a098df275ace2c73`, passed 180 host tests and four-device inference checks. This release uses native YAML configuration; `rad-yaml` converts the command options below into that configuration.
 
-| Artifact | Mode | GPUs | PP at 0 | TG at 0 | PP at 64K | TG at 64K |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Qwen3.8-27B FP8 | Target only | 2 | 5,233.6 | 41.05 | 2,854.3 | 37.06 |
-| Qwen3.8-27B FP8 | DFlash2-7 | 2 | 1,702.3 | 96.08 | 279.2 | 124.29 |
-| Qwen3.8-27B MXFP4 | Target only | 1 | 1,908.4 | 38.50 | 667.4 | 31.82 |
-| Qwen3.8-27B MXFP4 | DFlash2-7 | 1 | 1,229.5 | 114.24 | 141.2 | 73.59 |
-| Flash Next FP8/IQ4R | Target only / RAM | 4 | 6,443.5 | 121.44 | 5,070.2 | 117.10 |
-| Flash Next FP8/IQ4R | MTP3 / RAM | 4 | 7,241.9 | 319.25 | 4,519.9 | 323.58 |
+## Install and choose a profile
 
-These are two-repeat mean rates in tokens/s on a four-card Threadripper 9970X / 64 GB host, using verified throughput-performance and automatic GPU fans under an explicit user-approved benchmark-policy exception. Each row uses only the listed GPUs. PP measures useful follow-up tokens through the first response token, including any reported history replay. The workload is deterministic raw completion speed, separate from sampled chat or coding-agent scores.
+In [AI Toolbox Cockpit](https://github.com/kyuz0/ai-toolbox-cockpit), select the R9700 platform and Standalone Radiance. Install or update the existing `radiance-rocm-10.1` toolbox, download Qwen3.8-Flash-Next IQR-V4, then choose its serving profile. MTP defaults to three draft tokens.
 
-## Install
+| Profile | Context default | Configured server slots | Memory placement |
+| --- | ---: | ---: | --- |
+| Native context, disk | 262,144 | 16 | Disk n-grams, 144 recurrent snapshots |
+| Native context, RAM | 262,144 | 16 | RAM n-grams, 48 tip-only recurrent snapshots, GPU embeddings |
+| Single-user 1M extension | 1,000,000 | 1 | Disk n-grams, 144 recurrent snapshots, YaRN `4:262144` |
 
-```bash
-podman pull docker.io/kyuz0/amd-r9700-toolboxes:radiance-rocm-10.1
-toolbox create radiance-rocm-10.1 --image docker.io/kyuz0/amd-r9700-toolboxes:radiance-rocm-10.1
-toolbox run --container radiance-rocm-10.1 radiance --help
-```
+The native disk profile completed the full nine-depth speed workload through 64K history at 1, 4, 8, 10 and 16 simultaneous requests. At full 262K context, four simultaneous sessions retained their complete histories in both repeats. At 8, 10 and 16 sessions, all requests completed, but only five histories per batch remained cached; the others were recomputed. Choose up to four active sessions for the tested fully retained 262K workload. Five through seven active sessions have not been tested.
 
-The image also runs directly in Podman or Docker. Normal Toolbx entry was verified. No host ROCm SDK installation is required.
+The single-user extension processed 999,744 input tokens and generated 256 output tokens using the model owner's [documented YaRN extension](https://huggingface.co/Qwen/Qwen3.8-Flash-Next/blob/812d96e10a0dd82b69d749e68693698cf6c36daa/README.md). This establishes input capacity, not answer quality over a million tokens or concurrent 1M-session support.
 
-## Native model files
+## Model artifact
 
-These containers include their tokenizer, vision and drafting tensors. A GGUF or vLLM checkpoint is a different format.
+Download the native RAD file through Cockpit's Model Manager. A GGUF or vLLM checkpoint is not interchangeable with this format.
 
-| Model | Repository revision | File | Bytes | GPU layout |
-| --- | --- | --- | ---: | --- |
-| Qwen3.8-27B FP8 | `StillDeadcode/qwen3.8-27b-fp8@edd43fda378af6b3b5e8981b6e936145be9608fd` | `qwen3.8-27b-fp8.rad` | 30,783,856,640 | TP2 or TP4 |
-| Qwen3.8-27B MXFP4 | `StillDeadcode/qwen3.8-27b-mxfp4@60bd4139f335205fbc120e5534329c30b691af0e` | `qwen3.8-27b-mxfp4.rad` | 19,377,119,232 | TP1 or TP4 |
-| Qwen3.8-Flash-Next FP8/IQ4R | `StillDeadcode/qwen3.8-next-flash-fp8-iq4r-moe@8267a67384583f6be309981baf878b09ff900a9a` | `qwen3.8-next-flash-fp8-iq4r-moe.rad` | 121,969,901,568 | TP4 |
+| Item | Value |
+| --- | --- |
+| Repository | [StillDeadcode/qwen3.8-next-flash-iqr-v4](https://huggingface.co/StillDeadcode/qwen3.8-next-flash-iqr-v4) |
+| Qualified revision | `679c943216e5a33da5f458b5da378586219e874b` |
+| File | `qwen3.8-next-flash-iqr-v4.rad` |
+| Size | 121,678,372,864 bytes |
+| GPU allocation | TP4, exact inter-GPU transport, i8 KV |
 
-Use a pinned Hugging Face download or Cockpit's native model manager. The downloader's native transfer checks and exact file-size/revision coverage establish acquisition; inference qualification is separate.
+The artifact includes its tokenizer and native draft tensors. Expert weights remain in VRAM. The disk profile reads n-grams from the model file and reserves about 15.93 GiB of host memory for recurrent snapshots; it left approximately 37 GiB of host memory available during the measured workload.
 
-## Launch Qwen27B FP8
+The RAM profile keeps approximately 47.7 GiB of n-grams and 5.31 GiB of recurrent snapshots in host memory, with embeddings in VRAM. It is faster on the measured 0–64K workload, but left only about 1 GiB of host memory available. Prefer disk n-grams when other applications need RAM. Both profiles retained four active full-window sessions; at eight, RAM retained four histories per batch and reached a 139-second maximum first-token wait, versus five histories and 106 seconds for disk. The speed advantage at shorter histories does not establish better full-window concurrency.
 
-Set `MODEL` to the complete native file. This profile binds only to local loopback and mounts the selected model read-only.
+## Manual launch
+
+Set `MODEL` to the complete native file. This command uses the measured native-context allocation and exposes the API only on local loopback.
 
 ```bash
-MODEL="$HOME/models/radiance/qwen38-27b-fp8-edd43fda/qwen3.8-27b-fp8.rad"
+MODEL="$HOME/models/radiance/qwen38-flash-iqrv4-679c9432/qwen3.8-next-flash-iqr-v4.rad"
 podman run --rm -it --name radiance-server \
   --device /dev/kfd --device /dev/dri --group-add keep-groups \
   --security-opt seccomp=unconfined --security-opt label=disable \
   -p 127.0.0.1:18890:18890 -v "$MODEL:/models/model.rad:ro" \
   docker.io/kyuz0/amd-r9700-toolboxes:radiance-rocm-10.1 \
-  radiance --model /models/model.rad --host 0.0.0.0 --port 18890 \
-  --tp 2 --tp-wire exact --placement all_vram --kv-cache-dtype fp8 \
-  --max-model-len 8192 --max-num-seqs 1 --max-num-batched-tokens 2048 \
-  --num-speculative-tokens 0 --reasoning-effort xhigh
+  bash -ceu 'rad-yaml "$@" > /tmp/radiance.yaml; radiance --config /tmp/radiance.yaml --check; exec radiance --config /tmp/radiance.yaml' radiance-launch \
+  --model /models/model.rad --host 0.0.0.0 --port 18890 \
+  --tp 4 --tp-wire exact --placement all_vram --kv-cache-dtype i8 \
+  --max-model-len 262144 --max-num-seqs 16 --max-num-batched-tokens 2048 \
+  --ngram-placement disk --checkpoint-slots 144 --prefill-interleave 0 \
+  --num-speculative-tokens 3 --reasoning-effort xhigh
 ```
 
-For MXFP4, select its file and use `--tp 1`. The FP8 bundled DFlash2 profile uses `--num-speculative-tokens 7`. Vision remains enabled; `--mm-max-patches 0` disables image input. Context includes both prompt and generated tokens; additional sessions require additional cache capacity.
+For the RAM profile, replace `--ngram-placement disk --checkpoint-slots 144` with `--ngram-placement ram --checkpoint-slots 48 --checkpoint-policy tip-only --embedding-placement vram --host-headroom-mib 2048`. Keep the other native-profile settings, including 16 configured slots and interleave0.
 
-The API exposes `/health`, `/v1/models`, `/v1/chat/completions`, raw `/v1/completions`, `/tokenize` and `/metrics`. Qwen's sampled thinking profile uses temperature 1.0, top-p 0.95, top-k 20, min-p 0 and explicit thinking. The sampled non-thinking profile uses temperature 0.7, top-p 0.8, top-k 20, min-p 0 and presence penalty 1.5. Request settings override server defaults; select the thinking mode explicitly in clients.
+For the tested single-user extension, replace `--max-model-len 262144 --max-num-seqs 16` with `--max-model-len 1000000 --max-num-seqs 1 --rope-scaling yarn:4:262144`. For decoding without MTP, set `--num-speculative-tokens 0`.
 
-## Four-GPU Qwen27 FP8
+Keep the native recipe's 16 configured slots when reproducing its allocation; active request count is controlled separately by clients. Reducing configured slots can change the attention-cache pool. The 1M profile was explicitly tested with one slot.
 
-The native FP8 artifact also completed matched target-only and DFlash2-7 depth curves on four R9700s with the same published Radiance 1.12.0 image. To reproduce the measured allocation, use the FP8 command above with `--tp 4 --max-model-len 67840 --max-num-seqs 16` and add `--checkpoint-slots 144`. Keep `--num-speculative-tokens 0` for target-only decoding or select `7` for DFlash2. FP8 KV, exact inter-GPU communication and GPU weight placement remain as shown above.
+The text measurements kept the artifact's vision tower loaded at its automatic allocation. The command above preserves that allocation. API endpoints include `/health`, `/v1/models`, `/v1/chat/completions`, `/v1/completions`, `/tokenize` and `/metrics`.
 
-The 144 hybrid-state checkpoints reserve about 20.65 GiB of host RAM in addition to other process memory. The model weights remain in VRAM. The server allocates 16 sequences; the client separately selects how many requests run simultaneously. Every row below uses all four GPUs, including the one-request rows.
+## Measured speed
 
-| Requests | Mode | Aggregate PP / TG at 8K (tokens/s) | Aggregate PP / TG at 64K (tokens/s) |
-| ---: | --- | ---: | ---: |
-| 1 | Target only | 6,826.65 / 69.37 | 4,791.81 / 63.78 |
-| 1 | DFlash2-7 | 6,593.97 / 243.64 | 4,708.50 / 133.89 |
-| 4 | Target only | 6,308.07 / 219.81 | 3,672.79 / 170.67 |
-| 4 | DFlash2-7 | 6,326.95 / 494.47 | 3,689.00 / 269.16 |
-| 8 | Target only | 6,259.07 / 322.27 | 3,725.17 / 218.62 |
-| 8 | DFlash2-7 | 6,340.79 / 551.27 | 3,735.80 / 304.06 |
-| 16 | Target only | 6,182.95 / 419.47 | 455.62 / 52.70 |
-| 16 | DFlash2-7 | 6,300.50 / 578.32 | 500.77 / 61.27 |
+Fixed MTP3, interleave0, four GPUs and 16 configured slots; aggregate prompt processing / generation in tokens/s. Each placement uses its profile above:
 
-Both modes completed all nine history depths with two repeats, totaling 1,044 measured requests with matching logical prime/follow-up inputs. At 64K, one, four and eight requests retained the complete history; sixteen requests retained a mean 49,280 tokens and replayed 16,256 in both modes. These rates include that replay. See the [complete paired speed curves](https://local-llm-benchmarks.dev/speed) by selecting R9700, four GPUs, Qwen3.8-27B, FP8 and Standalone Radiance, then the request count and decoding mode.
+| Simultaneous requests | Disk, fresh prompt | Disk, 64K history | RAM, 64K history |
+| ---: | ---: | ---: | ---: |
+| 1 | 8,810 / 325 | 6,546 / 273 | 7,238 / 332 |
+| 4 | 8,198 / 555 | 6,756 / 459 | 7,043 / 523 |
+| 8 | 8,122 / 645 | 6,834 / 523 | 7,052 / 546 |
+| 10 | 8,318 / 616 | 7,020 / 543 | 7,092 / 561 |
+| 16 | 8,114 / 592 | 6,905 / 574 | 7,101 / 588 |
 
-## Four-GPU Qwen27 MXFP4
-
-The native MXFP4 artifact completed the same four-card target-only and DFlash2-7 workload. Select `qwen3.8-27b-mxfp4.rad` and use `--tp 4 --max-model-len 67840 --max-num-seqs 16 --checkpoint-slots 144`, with `--num-speculative-tokens 0` or `7`. This uses the [same FP8-KV and host-checkpoint allocation](#four-gpu-qwen27-fp8) described above, including about 20.65 GiB of host state. All rows use four GPUs; request count is client concurrency.
-
-| Requests | Mode | Aggregate PP / TG at 8K (tokens/s) | Aggregate PP / TG at 64K (tokens/s) |
-| ---: | --- | ---: | ---: |
-| 1 | Target only | 6,951.52 / 100.62 | 4,845.35 / 88.95 |
-| 1 | DFlash2-7 | 6,866.16 / 341.85 | 4,753.74 / 255.33 |
-| 4 | Target only | 6,583.42 / 296.00 | 3,732.60 / 210.89 |
-| 4 | DFlash2-7 | 6,475.65 / 589.78 | 3,721.66 / 342.43 |
-| 8 | Target only | 6,456.68 / 399.35 | 3,789.61 / 249.09 |
-| 8 | DFlash2-7 | 6,477.50 / 591.26 | 3,794.28 / 324.65 |
-| 16 | Target only | 6,466.94 / 485.15 | 461.67 / 54.06 |
-| 16 | DFlash2-7 | 6,441.93 / 575.80 | 513.90 / 63.59 |
-
-Both modes completed all nine depths and two repeats: 1,044 measured requests with matching logical prime/follow-up inputs. At 64K, one, four and eight requests retained all history; sixteen retained a mean 49,280 tokens and replayed 16,256 in both modes. The rates include this replay. In the [speed viewer](https://local-llm-benchmarks.dev/speed), select R9700, four GPUs, Qwen3.8-27B, MXFP4 and Standalone Radiance to compare both full curves at the desired request count.
-
-## Launch Flash Next
-
-Select its native file, use `--tp 4` and add `--ngram-placement ram` to the launch command above. Target-only decoding uses `--num-speculative-tokens 0`; the bundled MTP profile uses `--num-speculative-tokens 3`.
-
-The 47.68 GiB n-gram table lives in pinned host RAM. Allow about 54 GiB of available host memory at startup, including loading headroom. Main weights and experts use the four GPU pools; a small token-embedding pool also uses pinned host memory. `--placement all_vram` does not place the n-gram table in VRAM. Start with an 8,192-token context and one session. Complete C4/C8/C16 standard-depth curves used 16 server sequences. At 64K, MTP3 aggregate decode reached 477.78/186.26/41.61 tokens/s respectively, with increasing history replay at C8/C16. Prefer one or four active clients for deep-context work.
+All nine depths, two repeats and exact 256-token outputs completed without history replay. Each measurement appends 2,048 tokens to a primed history. These are deterministic raw-completion speed measurements; they do not establish coding-agent quality. Aggregate generation is measured over the batch output span and is not an individual user's rate. The host used throughput-performance and automatic GPU fans.
 
 ## Build and publish
 
-Run **Actions → Build & Publish Standalone Radiance**. The default resolves the latest stable release and records its exact commit. Enter an explicit full commit to reproduce the measured build. The workflow builds the image, runs the host suite and no-device native smoke checks, uploads provenance, then publishes an immutable source/run tag and the rolling `radiance-rocm-10.1` channel. Compiler rebuilding is not part of this recipe; `RAD_HIP_VOPD_REPEATABLE=OFF` selects upstream's stock-toolchain build path.
+Run **Actions → Build & Publish Standalone Radiance**. The default resolves the latest stable release and records its exact commit. Use `2a2b756371c26f2768b8d129a098df275ace2c73` to reproduce the qualified source. The workflow builds the image, runs host tests and native no-device smoke checks, uploads provenance, and publishes an immutable source/run tag plus the existing rolling `radiance-rocm-10.1` channel.
 
-The image records source revision, compiler version, build packages, licenses and the host-test completion marker under `/opt/radiance/share/doc/radiance/`. CI host tests do not replace model inference on the target GPUs.
-
-## Frozen-continuation quality
-
-The frozen-continuation panels completed on the published image with target-only scoring. NLL is per local target token; lower is better. These are hosted-continuation checks, without an original-weight full-logit parity claim.
-
-| Native artifact | Short100 NLL | Long12 NLL | Local target tokens, short / long |
-| --- | ---: | ---: | ---: |
-| Qwen3.8-27B FP8 | 0.281940 | 0.099176 | 5,836 / 764 |
-| Qwen3.8-27B MXFP4 | 0.318670 | 0.147677 | 5,836 / 764 |
-| Flash Next FP8/IQ4R | 0.288974 | 0.130511 | 5,696 / 766 |
+`RAD_HIP_VOPD_REPEATABLE=OFF` selects the stock-toolchain build path; no LLVM rebuild is required. Source revision, compiler version, package/license receipts and the host-test completion marker are stored under `/opt/radiance/share/doc/radiance/`. GPU inference checks remain separate from CI host tests.

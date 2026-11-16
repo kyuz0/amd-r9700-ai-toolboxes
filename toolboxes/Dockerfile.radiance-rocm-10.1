@@ -60,7 +60,7 @@ RUN cmake -S . -B /build -G Ninja -DCMAKE_BUILD_TYPE=Release     -DCMAKE_INSTALL
 FROM builder AS tested
 ARG TEST_JOBS=8
 ARG TEST_CPU_BUDGET_SCALE=1
-RUN RAD_TEST_CPU_BUDGET_SCALE="$TEST_CPU_BUDGET_SCALE" ctest --test-dir /build -LE 'gpu|oot' -j"$TEST_JOBS" --output-on-failure \
+RUN RAD_TEST_CPU_BUDGET_SCALE="$TEST_CPU_BUDGET_SCALE" ctest --test-dir /build -LE 'gpu|oot|parity' -j"$TEST_JOBS" --output-on-failure \
  && touch /opt/radiance/share/doc/radiance/host-tests-passed \
  && printf 'CPU budget scale: %s\n' "$TEST_CPU_BUDGET_SCALE" > /opt/radiance/share/doc/radiance/host-test-profile.txt
 

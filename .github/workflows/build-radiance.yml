@@ -90,6 +90,7 @@ jobs:
           set -euo pipefail
           docker run --rm --network none radiance-check:latest radiance --help
           docker run --rm --network none radiance-check:latest rad-info --plugins
+          docker run --rm --network none radiance-check:latest rad-yaml --help
           mkdir -p build-provenance
           docker create --name radiance-receipt radiance-check:latest
           docker cp radiance-receipt:/opt/radiance/share/doc/radiance/. build-provenance/

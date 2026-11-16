@@ -4,7 +4,7 @@ Pre-built `llama.cpp` and standalone Radiance containers for running LLMs with V
 
 ## Standalone Radiance
 
-[Native Radiance installation and Qwen profiles](docs/radiance-rocm-10.1.md) for R9700 cards. This source-built ROCm 10.1 toolbox uses the supplied compiler and native `.rad` models. The older vLLM Radiance toolbox is a separate legacy engine.
+[Radiance 2.1 installation and Flash Next IQR-V4 profiles](docs/radiance-rocm-10.1.md) for four R9700 cards, with MTP3, native 262K context and a tested single-user 1M YaRN extension. The ROCm 10.1 toolbox uses the supplied compiler and native `.rad` models.
 
 ## Current R9V toolbox
 
@@ -39,7 +39,7 @@ Images are hosted on [Docker Hub](https://hub.docker.com/r/kyuz0/amd-r9700-toolb
 | :--- | :--- | :--- |
 | `vulkan-radv` | Vulkan (Mesa RADV) | Most stable and compatible. Recommended for most users and models. |
 | `vulkan-rocmfpx` | Vulkan (ROCmFPX, Fedora 43) | Vulkan-only `charlie12345/ROCmFPX` build with ROCmFP3/FP4/FP6/FP8 weight formats. No ROCm runtime dependency. |
-| `radiance-rocm-10.1` | Standalone Radiance / ROCm 10.1 | Native `.rad` Qwen models, image input and bundled draft heads. Manual source-pinned build. |
+| `radiance-rocm-10.1` | Standalone Radiance / ROCm 10.1 | Qwen3.8-Flash-Next IQR-V4 on four GPUs, MTP3, native 262K and single-user 1M YaRN. Manual source-pinned build. |
 | `rocm-10.0` | ROCm 10.0 Core SDK (Fedora 44) | Stable ROCm Core SDK build using AMD's supported `gfx1201` package set. |
 | `therock-nightly` | TheRock Nightly (Fedora 43) | Tracks AMD's latest multi-architecture `gfx120X-all` nightly for RDNA 4 (`gfx1200`/`gfx1201`). |
 
