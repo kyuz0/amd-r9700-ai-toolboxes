@@ -10,11 +10,11 @@ In [AI Toolbox Cockpit](https://github.com/kyuz0/ai-toolbox-cockpit), select the
 
 | Profile | Context default | Configured server slots | Memory placement |
 | --- | ---: | ---: | --- |
-| Native context, disk | 262,144 | 16 | Disk n-grams, 144 recurrent snapshots |
-| Native context, RAM | 262,144 | 16 | RAM n-grams, 48 tip-only recurrent snapshots, GPU embeddings |
+| Native context, disk | 262,144 | 1 by default; up to 16 | Disk n-grams, 144 recurrent snapshots |
+| Native context, RAM | 262,144 | 1 by default; up to 16 | RAM n-grams, 48 tip-only recurrent snapshots, GPU embeddings |
 | Single-user 1M extension | 1,000,000 | 1 | Disk n-grams, 144 recurrent snapshots, YaRN `4:262144` |
 
-The native disk profile completed the full nine-depth speed workload through 64K history at 1, 4, 8, 10 and 16 simultaneous requests. At full 262K context, four simultaneous sessions retained their complete histories in both repeats. At 8, 10 and 16 sessions, all requests completed, but only five histories per batch remained cached; the others were recomputed. Choose up to four active sessions for the tested fully retained 262K workload. Five through seven active sessions have not been tested.
+With 16 configured server slots, the native disk profile completed the full nine-depth speed workload through 64K history at 1, 4, 8, 10 and 16 simultaneous requests. At full 262K context, four simultaneous sessions retained their complete histories in both repeats. At 8, 10 and 16 sessions, all requests completed, but only five histories per batch remained cached; the others were recomputed. Choose up to four active sessions for the tested fully retained 262K workload. Five through seven active sessions have not been tested.
 
 The single-user extension processed 999,744 input tokens and generated 256 output tokens using the model owner's [documented YaRN extension](https://huggingface.co/Qwen/Qwen3.8-Flash-Next/blob/812d96e10a0dd82b69d749e68693698cf6c36daa/README.md). This establishes input capacity, not answer quality over a million tokens or concurrent 1M-session support.
 
@@ -36,7 +36,7 @@ The RAM profile keeps approximately 47.7 GiB of n-grams and 5.31 GiB of recurren
 
 ## Manual launch
 
-Set `MODEL` to the complete native file. This command uses the measured native-context allocation and exposes the API only on local loopback.
+Set `MODEL` to the complete native file. This command uses the one-request native-context default and exposes the API only on local loopback.
 
 ```bash
 MODEL="$HOME/models/radiance/qwen38-flash-iqrv4-679c9432/qwen3.8-next-flash-iqr-v4.rad"
@@ -48,16 +48,16 @@ podman run --rm -it --name radiance-server \
   bash -ceu 'rad-yaml "$@" > /tmp/radiance.yaml; radiance --config /tmp/radiance.yaml --check; exec radiance --config /tmp/radiance.yaml' radiance-launch \
   --model /models/model.rad --host 0.0.0.0 --port 18890 \
   --tp 4 --tp-wire exact --placement all_vram --kv-cache-dtype i8 \
-  --max-model-len 262144 --max-num-seqs 16 --max-num-batched-tokens 2048 \
+  --max-model-len 262144 --max-num-seqs 1 --max-num-batched-tokens 2048 \
   --ngram-placement disk --checkpoint-slots 144 --prefill-interleave 0 \
   --num-speculative-tokens 3 --reasoning-effort xhigh
 ```
 
-For the RAM profile, replace `--ngram-placement disk --checkpoint-slots 144` with `--ngram-placement ram --checkpoint-slots 48 --checkpoint-policy tip-only --embedding-placement vram --host-headroom-mib 2048`. Keep the other native-profile settings, including 16 configured slots and interleave0.
+For the RAM profile, replace `--ngram-placement disk --checkpoint-slots 144` with `--ngram-placement ram --checkpoint-slots 48 --checkpoint-policy tip-only --embedding-placement vram --host-headroom-mib 2048`. Keep the other native-profile settings, including interleave0.
 
-For the tested single-user extension, replace `--max-model-len 262144 --max-num-seqs 16` with `--max-model-len 1000000 --max-num-seqs 1 --rope-scaling yarn:4:262144`. For decoding without MTP, set `--num-speculative-tokens 0`.
+For the tested single-user extension, replace `--max-model-len 262144 --max-num-seqs 1` with `--max-model-len 1000000 --max-num-seqs 1 --rope-scaling yarn:4:262144`. For decoding without MTP, set `--num-speculative-tokens 0`.
 
-Keep the native recipe's 16 configured slots when reproducing its allocation; active request count is controlled separately by clients. Reducing configured slots can change the attention-cache pool. The 1M profile was explicitly tested with one slot.
+Cockpit defaults to one concurrent request. Set `--max-num-seqs 16` when reproducing the benchmark allocation; active request count is controlled separately by clients. Reducing configured slots can change the attention-cache pool. The 1M profile was explicitly tested with one slot.
 
 The text measurements kept the artifact's vision tower loaded at its automatic allocation. The command above preserves that allocation. API endpoints include `/health`, `/v1/models`, `/v1/chat/completions`, `/v1/completions`, `/tokenize` and `/metrics`.
 
